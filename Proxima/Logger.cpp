@@ -52,10 +52,11 @@ void Logger::MessagePrint(const std::wstring& msg)
 
 void Logger::PrintOnGameConsole(const std::wstring& wmsg)
 {
+	// Used as an argument for print, not sure what it is
 	void* unknownSingleton = Utils::Hook::Get<void*>(0x389D01C);
 
+	// Call original print function
 	Utils::Hook::Call<void(void*, const wchar_t*)>(0x113B9D0)(unknownSingleton, wmsg.data());
-	const auto a = __func__ ;
 }
 
 
