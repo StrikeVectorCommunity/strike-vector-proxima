@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\steam_api">
+      <UniqueIdentifier>{23c7e4e5-9d74-445b-b4c9-c7e8f7d37919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\steam_api\Interfaces">
+      <UniqueIdentifier>{5e94c07c-7f1c-4d6e-8fdc-17435f50fb99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\steam_api">
+      <UniqueIdentifier>{d5392d70-c4f9-4288-a9d6-b87f55b2bdff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\steam_api\Interfaces">
+      <UniqueIdentifier>{09de737c-3e21-4735-b89f-abd9069d59a3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Steam.hpp">
+      <Filter>Header Files\steam_api</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamFriends.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamGameServer.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamMatchmaking.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamNetworking.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamRemoteStorage.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamUser.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamUtils.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamClient.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamApps.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamMatchmakingServers.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamUserStats.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamGameServerStats.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\Interfaces\SteamScreenshots.hpp">
+      <Filter>Header Files\steam_api\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="steam_api\servernetadr_t.hpp">
+      <Filter>Header Files\steam_api</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamFriends.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamGameServer.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamMatchmaking.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamNetworking.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamRemoteStorage.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamUser.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamUtils.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Steam.cpp">
+      <Filter>Source Files\steam_api</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooking.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamApps.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamMatchmakingServers.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamUserStats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamGameServerStats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamClient.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamScreenshots.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="steam_api\net.proto">
+      <Filter>Header Files\steam_api</Filter>
+    </None>
+  </ItemGroup>
+</Project>
