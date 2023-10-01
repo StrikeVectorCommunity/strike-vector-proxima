@@ -363,6 +363,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Server.hpp" />
     <ClInclude Include="Stats.hpp" />
+    <ClInclude Include="steam_api\gameserveritem_t.hpp" />
     <ClInclude Include="steam_api\Interfaces\SteamApps.hpp" />
     <ClInclude Include="steam_api\Interfaces\SteamClient.hpp" />
     <ClInclude Include="steam_api\Interfaces\SteamFriends.hpp" />
@@ -400,6 +401,7 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ServerList.cpp" />
     <ClCompile Include="Stats.cpp" />
+    <ClCompile Include="steam_api\gameserveritem_t.cpp" />
     <ClCompile Include="steam_api\Interfaces\SteamApps.cpp" />
     <ClCompile Include="steam_api\Interfaces\SteamClient.cpp" />
     <ClCompile Include="steam_api\Interfaces\SteamFriends.cpp">
