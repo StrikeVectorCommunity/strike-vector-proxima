@@ -64,7 +64,7 @@ namespace Steam {
 
 		if (hRequest == fakeServerRequest && iServer == fakeServerID)
 		{
-			Logger::Print("Requested server details for server {}!\n", iServer);
+			Logger::Print("Requested server details for server {}!", iServer);
 
 			static gameserveritem_t item{};
 

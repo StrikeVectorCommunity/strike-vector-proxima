@@ -39,4 +39,4 @@ private:
 
 #define XX(str) L#str
 #define X(str) XX(str)
-#define DUMP_FUNC_NAME() { Logger::Print("Called API {}:{} {}\n",  __FILE__, __FUNCTION__, __LINE__); }
+#define DUMP_FUNC_NAME() { Logger::Print("Called API {}:{} {}",  __FILE__, __FUNCTION__, __LINE__); }

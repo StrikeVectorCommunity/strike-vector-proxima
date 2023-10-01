@@ -7,6 +7,8 @@
 #ifndef PCH_H
 #define PCH_H
 
+#pragma once
+
 // add headers that you want to pre-compile here
 #include "framework.h"
 #include <windows.h>
@@ -23,8 +25,10 @@
 #include <iostream>
 #include <fstream>
 #include <codecvt>
+#include <filesystem>
 
 #include "windows.h"
+#include "iphlpapi.h"
 
 #include "Memory.h"
 #include "Hooking.h"
@@ -39,6 +43,8 @@ namespace Proxima
 }
 
 #include "steam_api/Steam.hpp"
+
+#include "FileSystem.hpp"
 
 #include "Client.hpp"
 #include "Server.hpp"

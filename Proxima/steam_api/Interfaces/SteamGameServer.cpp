@@ -6,28 +6,29 @@ namespace Steam
 {
     bool GameServer::InitGameServer(uint32 unIP, uint16 usGamePort, uint16 usQueryPort, uint32 unFlags, AppId_t nGameAppId, const char* pchVersionString)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Initialized game server with\nIP:{}\nPORT:{}\nQPORT:{}\nunFlags:{}\ngameAppID:{}\nversionString:{}", unIP, usGamePort, usQueryPort, unFlags, nGameAppId, pchVersionString);
+
         return true;
     }
     void GameServer::SetProduct(const char* pszProduct)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set product: {}", pszProduct);
     }
     void GameServer::SetGameDescription(const char* pszGameDescription)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set game description: {}", pszGameDescription);
     }
     void GameServer::SetModDir(const char* pszModDir)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set mod dir: {}", pszModDir);
     }
     void GameServer::SetDedicatedServer(bool bDedicated)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set dedicated: {}", bDedicated);
     }
     void GameServer::LogOn(const char* pszAccountName, const char* pszPassword)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Logging on:\nlogin:{}\npassword:{}", pszAccountName, pszPassword);
     }
     void GameServer::LogOnAnonymous()
     {
@@ -50,7 +51,7 @@ namespace Steam
     CSteamID GameServer::GetSteamID()
     {
         DUMP_FUNC_NAME();
-        return CSteamID();
+		return Proxima::Client::GetSteamID();
     }
     bool GameServer::WasRestartRequested()
     {
@@ -59,31 +60,31 @@ namespace Steam
     }
     void GameServer::SetMaxPlayerCount(int cPlayersMax)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set max player count: {}", cPlayersMax);
     }
     void GameServer::SetBotPlayerCount(int cBotplayers)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set bot player count: {}", cBotplayers);
     }
     void GameServer::SetServerName(const char* pszServerName)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set server name: {}", pszServerName);
     }
     void GameServer::SetMapName(const char* pszMapName)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set map name: {}", pszMapName);
     }
     void GameServer::SetPasswordProtected(bool bPasswordProtected)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set password protected: {}", bPasswordProtected);
     }
     void GameServer::SetSpectatorPort(uint16 unSpectatorPort)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set spectator port: {}", unSpectatorPort);
     }
     void GameServer::SetSpectatorServerName(const char* pszSpectatorServerName)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set spectator server name: {}", pszSpectatorServerName);
     }
     void GameServer::ClearAllKeyValues()
     {
@@ -91,19 +92,19 @@ namespace Steam
     }
     void GameServer::SetKeyValue(const char* pKey, const char* pValue)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set kv {}={}", pKey, pValue);
     }
     void GameServer::SetGameTags(const char* pchGameTags)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set game tags: {}", pchGameTags);
     }
     void GameServer::SetGameData(const char* pchGameData)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set game data: {}", pchGameData);
     }
     void GameServer::SetRegion(const char* pszRegion)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set region: {}", pszRegion);
     }
     bool GameServer::SendUserConnectAndAuthenticate(uint32 unIPClient, const void* pvAuthBlob, uint32 cubAuthBlobSize, CSteamID* pSteamIDUser)
     {
@@ -182,7 +183,7 @@ namespace Steam
     }
     void GameServer::SetHeartbeatInterval(int iHeartbeatInterval)
     {
-        DUMP_FUNC_NAME();
+        Logger::Print("Set heartbeat interval: {}", iHeartbeatInterval);
     }
     void GameServer::ForceHeartbeat()
     {

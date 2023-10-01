@@ -17,25 +17,7 @@ namespace Steam
 
 	CSteamID User::GetSteamID()
 	{
-		CSteamID id{};
-
-		//if (!idBits)
-		//{
-		//	if (Components::Dedicated::IsEnabled() || Components::ZoneBuilder::IsEnabled()) // Dedi guid
-		//	{
-		//		idBits = *reinterpret_cast<unsigned __int64*>(const_cast<char*>("DEDICATE"));
-		//	}
-		//	else if (Components::Singleton::IsFirstInstance()) // ECDSA guid
-		//	{
-		//		idBits = Components::Auth::GetKeyHash();
-		//	}
-		//	else // Random guid
-		//	{
-		//		idBits = (static_cast<unsigned __int64>(Game::Sys_Milliseconds()) << 32) | timeGetTime();
-		//	}
-		//}
-
-		return id;
+		return Proxima::Client::GetSteamID();
 	}
 
 	int User::InitiateGameConnection( void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer, uint32 unIPServer, uint16 usPortServer, bool bSecure)

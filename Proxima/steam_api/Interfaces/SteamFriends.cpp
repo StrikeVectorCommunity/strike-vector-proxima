@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "SteamFriends.hpp"
 
 STEAM_IGNORE_WARNINGS_START
 
@@ -7,7 +6,7 @@ namespace Steam
 {
 	const char *Friends::GetPersonaName()
 	{
-		return "PERSONA_NAME";
+		return Proxima::Client::GetName();
 	}
 
 	SteamAPICall_t Friends::SetPersonaName(const char *pchPersonaName)

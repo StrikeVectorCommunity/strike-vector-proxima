@@ -21,29 +21,28 @@ void Logger::PrintInternal(const std::wstring_view& fmt, std::wformat_args&& arg
 
 void Logger::PrintInternal(const std::string_view& fmt, std::format_args&& args)
 {
-	const auto narrow_msg = std::vformat(fmt, args);
+	// NChar to WChar
 
-	  const WCHAR *pwcsName;
-	  // required size
-	  int nChars = MultiByteToWideChar(CP_ACP, 0, narrow_msg.data(), -1, NULL, 0);
-	  // allocate it
-	  pwcsName = new WCHAR[nChars];
-	  MultiByteToWideChar(CP_ACP, 0, narrow_msg.data(), -1, (LPWSTR)pwcsName, nChars);
-	  // use it....
-    
-	  PrintInternal(pwcsName, std::make_wformat_args(0));
+	const auto narrowMessage = std::vformat(fmt, args);
 
-	  // delete it
-	  delete [] pwcsName;
+	const WCHAR* pwcsName;
+	int nChars = MultiByteToWideChar(CP_ACP, 0, narrowMessage.data(), -1, NULL, 0);
+	pwcsName = new WCHAR[nChars];
+	MultiByteToWideChar(CP_ACP, 0, narrowMessage.data(), -1, (LPWSTR)pwcsName, nChars);
+
+	PrintInternal(pwcsName, std::make_wformat_args(0));
+
+	delete[] pwcsName;
 }
 
 void Logger::MessagePrint(const std::wstring& msg)
 {
-	std::wprintf(L"%s", msg.data());
+	std::wprintf(L"%s\n", msg.data());
 	std::fflush(stdout);
 
 #ifdef _DEBUG
-	OutputDebugStringW(msg.data());
+	std::wstring withNewLine = msg + L"\n";
+	OutputDebugStringW(withNewLine.data());
 #endif
 
 	PrintOnGameConsole(msg);
@@ -52,17 +51,29 @@ void Logger::MessagePrint(const std::wstring& msg)
 
 void Logger::PrintOnGameConsole(const std::wstring& wmsg)
 {
-	// Used as an argument for print, not sure what it is
-	void* unknownSingleton = Utils::Hook::Get<void*>(0x389D01C);
+	// Until we know what's up with that WoW64 emulation subsystem error, better not to hook into the game directly
+	// It's unstable and hard to debug
+	// Maybe there is some sort of anti tampering code
+	return;
 
-	// Call original print function
-	Utils::Hook::Call<void(void*, const wchar_t*)>(0x113B9D0)(unknownSingleton, wmsg.data());
+#if false
+	//// Call original print function
+	if (!wmsg.empty())
+	{
+		const bool* GFileManager = Utils::Hook::Get<bool*>(0x389D030);
+
+		if (*GFileManager)
+		{
+			constexpr auto GLog = 0x389D028;
+
+			Utils::Hook::Call<void(int, const wchar_t*)>(0x113B9D0)(GLog, wmsg.c_str());
+		}
+	}
+#endif
 }
 
 
 
 Logger::Logger()
 {
-	//Utils::Hook(Game::G_LogPrintf, G_LogPrintf_Hk, HOOK_JUMP).install()->quick();
-	//Utils::Hook(Game::Com_PrintMessage, PrintMessage_Stub, HOOK_JUMP).install()->quick();
 }
