@@ -65,6 +65,9 @@ namespace Proxima
 	{
 		profile.steamID = GenerateSteamIDFromMacAddress();
 		profile.name = GetUsername();
+
+		Logger::Initialize();
+
 		Logger::Print("Client initialized - profile name {} and ID {} (account {})\n", profile.name, profile.steamID.m_unAll64Bits, static_cast<unsigned int>(profile.steamID.m_comp.m_unAccountID));
 	}
 
@@ -75,7 +78,6 @@ namespace Proxima
 		//Utils::Hook(0x24E8BBB, EngineInit, HOOK_CALL).install()->quick();
 		//Utils::Hook(0x24E8C31, EngineInit, HOOK_CALL).install()->quick();
 
-		
 		Client::InitializeInternal();
 	}
 }

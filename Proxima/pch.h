@@ -45,8 +45,10 @@ namespace Proxima
 #include "steam_api/Steam.hpp"
 
 #include "FileSystem.hpp"
+#include "Stats.hpp"
 
 #include "Client.hpp"
 #include "Server.hpp"
+#include "ServerList.hpp"
 
 #endif //PCH_H

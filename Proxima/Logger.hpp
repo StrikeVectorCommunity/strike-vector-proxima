@@ -3,7 +3,7 @@
 class Logger
 {
 public:
-	Logger();
+	static void Initialize();
 
 	static void Print_Stub(const wchar_t* message, ...);
 

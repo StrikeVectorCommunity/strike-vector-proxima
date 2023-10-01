@@ -1,6 +1,8 @@
 #pragma once
 namespace Proxima
 {
+	enum StatsCategory : uint8_t;
+
 	class FileSystem
 	{
 	public:
@@ -27,10 +29,19 @@ namespace Proxima
 
 			return static_cast<int32>(GetFileSize(path));
 		}
+		
+		static bool ReadStats(StatsCategory channel, std::map<std::string, float> out);
+
+		static bool WriteStats(StatsCategory channel, std::map<std::string, float> in);
 
 	private:
+		static const std::filesystem::path BASE_PATH;
+		static const std::filesystem::path STATS_DIRECTORY_NAME;
+		static const std::filesystem::path STATS_USER_FILENAME;
+		static const std::filesystem::path STATS_SERVER_FILENAME;
 		static const std::filesystem::path REMOTE_STORAGE_DIRECTORY_NAME;
-
+		
+		static void CreateStatsFolder();
 		static void CreateRemoteStorageFolder();
 		static bool WriteFileInternal(const std::string& data, const std::filesystem::path& path);
 		static std::string ReadFileInternal(const std::filesystem::path& path);

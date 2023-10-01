@@ -1,5 +1,14 @@
 #include "pch.h"
 
+
+void Logger::Initialize()
+{
+	OutputDebugStringA("Initialized logger\n");
+
+	// Do not filter logs, always display no matter what channel they are
+	Utils::Hook::Set<uint8_t>(0x113B8E4, 0xEB);
+}
+
 void Logger::Print_Stub(const wchar_t* message, ...)
 {
 	wchar_t buf[4096]{};
@@ -73,7 +82,3 @@ void Logger::PrintOnGameConsole(const std::wstring& wmsg)
 }
 
 
-
-Logger::Logger()
-{
-}

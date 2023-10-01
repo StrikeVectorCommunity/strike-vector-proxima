@@ -273,6 +273,44 @@ public:
 	};
 };
 
+
+enum EResult
+{
+	k_EResultNone = 0,							// no result
+	k_EResultOK	= 1,							// success
+	k_EResultFail = 2							// generic failure 
+	// ...
+};
+
+struct GSStatsReceived_t
+{
+	enum { k_iCallback = 1800 };
+	EResult		m_eResult;		// Success / error fetching the stats
+	CSteamID	m_steamIDUser;	// The user for whom the stats are retrieved for
+};
+
+struct GSStatsStored_t
+{
+	enum { k_iCallback = 1800 + 1 };
+	EResult		m_eResult;		// success / error
+	CSteamID	m_steamIDUser;	// The user for whom the stats were stored
+};
+
+struct UserStatsReceived_t
+{
+	enum { k_iCallback = 1100 + 1 };
+	uint64		m_nGameID;		// Game these stats are for
+	EResult		m_eResult;		// Success / error fetching the stats
+	CSteamID	m_steamIDUser;	// The user for whom the stats are retrieved for
+};
+
+struct UserStatsStored_t
+{
+	enum { k_iCallback = 1100 + 2 };
+	uint64		m_nGameID;		// Game these stats are for
+	EResult		m_eResult;		// success / error
+};
+
 #include "Interfaces/SteamUser.hpp"
 #include "Interfaces/SteamUserStats.hpp"
 #include "Interfaces/SteamUtils.hpp"
@@ -299,7 +337,7 @@ namespace Steam
 			Base() : Flags(0), Callback(0) {};
 
 			virtual void Run(void* pvParam) = 0;
-			virtual void Run(void* pvParam, bool bIOFailure, uint64_t hSteamAPICall) = 0;
+			virtual void Run(void* pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall) = 0;
 			virtual int GetCallbackSizeBytes() = 0;
 
 			int GetICallback() { return Callback; }
@@ -317,13 +355,19 @@ namespace Steam
 			void* data;
 			int size;
 			int type;
-			uint64_t call;
+			SteamAPICall_t call;
 		};
 
-		static uint64_t RegisterCall();
+		static SteamAPICall_t RegisterCall();
 		static void RegisterCallback(Base* handler, int callback);
-		static void RegisterCallResult(uint64 call, Base* result);
-		static void ReturnCall(void* data, int size, int type, uint64_t call);
+
+		/// <summary>
+		/// addCallBack
+		/// </summary>
+		/// <param name="call"></param>
+		/// <param name="result"></param>
+		static void RegisterCallResult(SteamAPICall_t call, Base* result);
+		static void ReturnCall(void* data, int size, int type, SteamAPICall_t call);
 		static void RunCallbacks();
 
 		static void RunCallback(int32_t callback, void* data);
@@ -331,9 +375,9 @@ namespace Steam
 		static void Uninitialize();
 
 	private:
-		static uint64_t CallID;
-		static std::map<uint64_t, bool> Calls;
-		static std::map<uint64_t, Base*> ResultHandlers;
+		static SteamAPICall_t CallID;
+		static std::map<SteamAPICall_t, bool> Calls;
+		static std::map<SteamAPICall_t, Base*> ResultHandlers;
 		static std::vector<Result> Results;
 		static std::vector<Base*> CallbackList;
 		static std::recursive_mutex Mutex;
@@ -342,12 +386,12 @@ namespace Steam
 	bool Enabled();
 
 	STEAM_EXPORT bool SteamAPI_Init();
-	STEAM_EXPORT void SteamAPI_RegisterCallResult(Callbacks::Base* result, uint64 call);
+	STEAM_EXPORT void SteamAPI_RegisterCallResult(Callbacks::Base* result, SteamAPICall_t call);
 	STEAM_EXPORT void SteamAPI_RegisterCallback(Callbacks::Base* handler, int callback);
 	STEAM_EXPORT void SteamAPI_RunCallbacks();
 	STEAM_EXPORT void SteamAPI_Shutdown();
-	STEAM_EXPORT void SteamAPI_UnregisterCallResult();
-	STEAM_EXPORT void SteamAPI_UnregisterCallback();
+	STEAM_EXPORT void SteamAPI_UnregisterCallResult(Callbacks::Base* result, SteamAPICall_t call);
+	STEAM_EXPORT void SteamAPI_UnregisterCallback(Callbacks::Base* result);
 
 	STEAM_EXPORT bool SteamGameServer_Init(uint32 unIP, uint16 usSteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char* pchVersionString);
 	STEAM_EXPORT void SteamGameServer_RunCallbacks();

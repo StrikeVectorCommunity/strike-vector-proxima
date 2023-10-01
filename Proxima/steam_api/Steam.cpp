@@ -2,14 +2,14 @@
 
 namespace Steam
 {
-	uint64_t Callbacks::CallID = 0;
-	std::map<uint64_t, bool> Callbacks::Calls;
-	std::map<uint64_t, Callbacks::Base*> Callbacks::ResultHandlers;
+	SteamAPICall_t Callbacks::CallID = 0;
+	std::map<SteamAPICall_t, bool> Callbacks::Calls;
+	std::map<SteamAPICall_t, Callbacks::Base*> Callbacks::ResultHandlers;
 	std::vector<Callbacks::Result> Callbacks::Results;
 	std::vector<Callbacks::Base*> Callbacks::CallbackList;
 	std::recursive_mutex Callbacks::Mutex;
 
-	uint64_t Callbacks::RegisterCall()
+	SteamAPICall_t Callbacks::RegisterCall()
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
 		Callbacks::Calls[++Callbacks::CallID] = false;
@@ -23,25 +23,30 @@ namespace Steam
 		Callbacks::CallbackList.push_back(handler);
 	}
 
-	void Callbacks::RegisterCallResult(uint64 call, Callbacks::Base* result)
+	void Callbacks::RegisterCallResult(SteamAPICall_t call, Callbacks::Base* result)
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
 		Callbacks::ResultHandlers[call] = result;
 	}
 
-	void Callbacks::ReturnCall(void* data, int size, int type, uint64_t call)
+	void Callbacks::ReturnCall(void* data, int size, int type, SteamAPICall_t call)
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
 
-		Callbacks::Result result;
+		Callbacks::Result result{};
+
+		Logger::Print("Returning call {} of type {} with data ptr {} (length={})", call, type, reinterpret_cast<int>(data), size);
 
 		Callbacks::Calls[call] = true;
 
 		result.call = call;
-		result.data = data;
+		result.data = malloc(size); // This will get freed later during result handling
+		std::memcpy(result.data, data, size);
+
 		result.size = size;
 		result.type = type;
-
+		
+		Logger::Print("Pushing back results ({} results already)", Results.size());
 		Callbacks::Results.push_back(result);
 	}
 
@@ -63,12 +68,14 @@ namespace Steam
 			{
 				if (callback && callback->GetICallback() == result.type)
 				{
+					Logger::Print("Running callback on result type {}!", result.type);
 					callback->Run(result.data, false, 0);
 				}
 			}
 
 			if (result.data)
 			{
+				Logger::Print("Freeing result data for result type {}", result.type);
 				free(result.data);
 			}
 		}
@@ -126,7 +133,7 @@ namespace Steam
 			return true;
 		}
 
-		void SteamAPI_RegisterCallResult(Callbacks::Base* result, uint64 call)
+		void SteamAPI_RegisterCallResult(Callbacks::Base* result, SteamAPICall_t call)
 		{
 			Callbacks::RegisterCallResult(call, result);
 		}
@@ -148,12 +155,12 @@ namespace Steam
 			Callbacks::Uninitialize();
 		}
 
-		void SteamAPI_UnregisterCallResult()
+		void SteamAPI_UnregisterCallResult(Callbacks::Base* result, SteamAPICall_t call)
 		{
 			DUMP_FUNC_NAME();
 		}
 
-		void SteamAPI_UnregisterCallback()
+		void SteamAPI_UnregisterCallback(Callbacks::Base* result)
 		{
 			DUMP_FUNC_NAME();
 		}

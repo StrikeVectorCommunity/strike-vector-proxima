@@ -1,11 +1,9 @@
 #include "pch.h"
+#include "../Steam.hpp"
 
 namespace Steam {
 
 	// Fake server
-	static HServerListRequest fakeServerRequest = 123;
-	static int fakeServerID = 456;
-
 	HServerListRequest MatchmakingServers::RequestInternetServerList(AppId_t iApp, MatchMakingKeyValuePair_t** ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
@@ -15,19 +13,16 @@ namespace Steam {
 		request.callbacks = pRequestServersResponse;
 		request.cancelled = false;
 		request.completed = false;
-		request.id = fakeServerRequest;
+		request.id = Proxima::ServerList::GrabRequestId();
 
-		Logger::Print("Queueing call back for fake server ID {}, callback addr is {}? cancelled:{} completed:{}", fakeServerID, reinterpret_cast<int>(request.callbacks), request.cancelled, request.completed);
 
 		Proxima::Client::AddToQueue([request]() {
 			// When it's here
-			Logger::Print("Executing call back for fake server ID {}, callback addr is {}? cancelled:{} completed:{}", fakeServerID, reinterpret_cast<int>(request.callbacks), request.cancelled, request.completed);
-			request.callbacks->ServerResponded(fakeServerRequest, fakeServerID);
-			request.callbacks->RefreshComplete(fakeServerRequest, EMatchMakingServerResponse::eServerResponded);
-			});
+			Proxima::ServerList::GetServers(request.id, request);
+		});
 
 
-		return fakeServerRequest;
+		return request.id;
 	}
 	HServerListRequest MatchmakingServers::RequestLANServerList(AppId_t iApp, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
@@ -54,39 +49,18 @@ namespace Steam {
 		DUMP_FUNC_NAME();
 		return HServerListRequest();
 	}
+
 	void MatchmakingServers::ReleaseRequest(HServerListRequest hServerListRequest)
 	{
+		// Fine
+		DUMP_FUNC_NAME();
 	}
 
 	gameserveritem_t* MatchmakingServers::GetServerDetails(HServerListRequest hRequest, int iServer)
 	{
 		DUMP_FUNC_NAME();
 
-		if (hRequest == fakeServerRequest && iServer == fakeServerID)
-		{
-			Logger::Print("Requested server details for server {}!", iServer);
-
-			static gameserveritem_t item{};
-
-			item.m_nPing = 100;
-			item.m_NetAdr.SetIP(3232235777); // 192 178 1 1
-			item.m_NetAdr.SetConnectionPort(1234);
-			item.m_bHadSuccessfulResponse = true;
-			item.m_bDoNotRefresh = false;
-			item.m_nAppID = 246700;
-
-			item.SetName("TEST SERVER HELLO!!!");
-			item.m_steamID.m_unAll64Bits = 12345678;
-
-
-			std::strcpy(item.m_szGameDescription, "TEST SERVER DESCRIPTION");
-			std::strcpy(item.m_szMap, "TEST SERVER ");
-
-			return &item;
-
-		}
-
-		return nullptr;
+		return Proxima::ServerList::GetServerInfo(hRequest, iServer);
 	}
 	void MatchmakingServers::CancelQuery(HServerListRequest hRequest)
 	{
@@ -105,7 +79,7 @@ namespace Steam {
 	int MatchmakingServers::GetServerCount(HServerListRequest hRequest)
 	{
 		DUMP_FUNC_NAME();
-		return 0;
+		return Proxima::ServerList::GetServerCount(hRequest);
 	}
 	void MatchmakingServers::RefreshServer(HServerListRequest hRequest, int iServer)
 	{
@@ -128,7 +102,7 @@ namespace Steam {
 
 		//return HServerListRequest();
 		Steam_Matchmaking_Servers_Direct_IP_Request r;
-		r.id = 78910;
+		r.id = Proxima::ServerList::GrabRequestId();
 		r.ip = unIP;
 		r.port = usPort;
 		r.rules_response = pRequestServersResponse;
@@ -137,14 +111,14 @@ namespace Steam {
 		Logger::Print("Queueing call back for server rules of IP {}, callback addr is {}?", unIP, reinterpret_cast<int>(r.rules_response));
 
 
-		Proxima::Client::AddToQueue([unIP, r]() {
+		Proxima::Client::AddToQueue([unIP, usPort, r]() {
 			// When it's here
 			Logger::Print("Executing call back for rules of IP {}, callback addr is {}?", unIP, reinterpret_cast<int>(r.rules_response));
-			r.rules_response->RulesRefreshComplete();
-			});
+			Proxima::ServerList::GetServerRules(r.id, r, unIP, usPort);
+		});
 
 
-		return HServerQuery();
+		return r.id;
 
 	}
 	void MatchmakingServers::CancelServerQuery(HServerQuery hServerQuery)

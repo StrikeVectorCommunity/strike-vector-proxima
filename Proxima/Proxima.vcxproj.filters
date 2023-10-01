@@ -96,6 +96,9 @@
     <ClInclude Include="FileSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Stats.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -140,12 +143,6 @@
     <ClCompile Include="steam_api\Interfaces\SteamMatchmakingServers.cpp">
       <Filter>Source Files\steam_api\Interfaces</Filter>
     </ClCompile>
-    <ClCompile Include="steam_api\Interfaces\SteamUserStats.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="steam_api\Interfaces\SteamGameServerStats.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="steam_api\Interfaces\SteamClient.cpp">
       <Filter>Source Files\steam_api\Interfaces</Filter>
     </ClCompile>
@@ -164,10 +161,25 @@
     <ClCompile Include="FileSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamGameServerStats.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="steam_api\Interfaces\SteamUserStats.cpp">
+      <Filter>Source Files\steam_api\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="Stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="steam_api\net.proto">
       <Filter>Header Files\steam_api</Filter>
+    </None>
+    <None Include="ServerList.hpp">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>
