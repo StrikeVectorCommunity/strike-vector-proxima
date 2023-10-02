@@ -4,19 +4,24 @@ namespace Proxima
 {
 	std::vector<std::function<void()>> Client::frameQueue{};
 	Client::Profile Client::profile{};
+	std::recursive_mutex Client::mutex;
 
 	void Client::RunFrame()
 	{
+		std::lock_guard<std::recursive_mutex> _(mutex);
 		for (const auto& f : frameQueue)
 		{
 			f();
 		}
 
 		frameQueue.clear();
+
+		ServerList::RunFrame();
 	}
 
 	void Client::AddToQueue(const std::function<void()>& func)
 	{
+		std::lock_guard<std::recursive_mutex> _(mutex);
 		frameQueue.push_back(func);
 	}
 
@@ -44,7 +49,7 @@ namespace Proxima
 
 	   steamID.m_comp.m_EAccountType = EAccountType::k_EAccountTypeIndividual;
 	   steamID.m_comp.m_EUniverse = EUniverse::k_EUniversePublic;
-	   steamID.m_comp.m_unAccountInstance = 123;
+	   steamID.m_comp.m_unAccountInstance = 1;
 	   steamID.m_comp.m_unAccountID = id;
 
 	   free(AdapterInfo);

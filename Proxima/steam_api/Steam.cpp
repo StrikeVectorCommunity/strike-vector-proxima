@@ -167,7 +167,7 @@ namespace Steam
 
 		bool SteamGameServer_Init(uint32 unIP, uint16 usSteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char* pchVersionString)
 		{
-			DUMP_FUNC_NAME();
+			Logger::Print("Initialized steam game server:\nIP:{}\nPort:{}\nMode:{}\nVersion:{}", unIP, usGamePort, static_cast<int>(eServerMode), pchVersionString);
 			return true;
 
 			/*bool ret = SteamInternal_GameServer_Init( unIP, usSteamPort, usGamePort, usQueryPort, serverMode, pchVersionString );
@@ -251,7 +251,7 @@ namespace Steam
 		}
 		HSteamUser SteamAPI_GetHSteamUser()
 		{
-			return NULL;
+			return 1;
 		}
 		Steam::Apps* SteamApps()
 		{

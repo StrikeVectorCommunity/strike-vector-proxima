@@ -9,6 +9,8 @@
 
 #pragma once
 
+#define STATIC_TO_DYNAMIC_OFFSET(x) (x - 0xB20000) 
+
 // add headers that you want to pre-compile here
 #include "framework.h"
 #include <windows.h>

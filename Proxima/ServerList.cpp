@@ -4,14 +4,19 @@ namespace Proxima
 {
 	std::vector<ServerList::ServerData> ServerList::mockServers{};
 	bool ServerList::hasMocked;
+	std::recursive_mutex ServerList::mutex;
+
+	std::vector< Steam::Steam_Matchmaking_Request*> ServerList::requestsToProcess{};
+
 	HServerListRequest ServerList::nextRequestId = 1;
 
-	void ServerList::GetServers(HServerListRequest req, Steam::Steam_Matchmaking_Request request)
+	void ServerList::GetServers(Steam::Steam_Matchmaking_Request* request)
 	{
 		if (!hasMocked)
 		{
 			hasMocked = true;
-			for (size_t i = 0; i < 1; i++)
+
+			for (size_t i = 0; i < 0; i++)
 			{
 				mockServers.push_back(CreateMockServer());
 			}
@@ -19,10 +24,19 @@ namespace Proxima
 
 		for (size_t i = 0; i < mockServers.size(); i++)
 		{
-			request.callbacks->ServerResponded(req, i + 1);
+			Steam::Steam_Matchmaking_Servers_Gameserver server{};
+			server.last_recv = std::chrono::high_resolution_clock::now();
+			server.server.id = i + 1;
+			server.server.ip = mockServers[i].item.m_NetAdr.GetIP();
+			server.server.port = mockServers[i].item.m_NetAdr.GetConnectionPort();
+
+			request->gameservers_filtered.push_back(server);
+			request->callbacks->ServerResponded(request->id, i + 1);
 		}
 
-		request.callbacks->RefreshComplete(req, Steam::EMatchMakingServerResponse::eServerResponded);
+		request->completed = true;
+		request->callbacks->RefreshComplete(request->id, Steam::EMatchMakingServerResponse::eServerResponded);
+		delete request;
 	}
 
 	gameserveritem_t* ServerList::GetServerInfo(HServerListRequest requestId, int id)
@@ -52,6 +66,26 @@ namespace Proxima
 		Logger::Print("No server on ip:port {}:{} in server list ({})", ip, port, mockServers.size());
 	}
 
+
+	void ServerList::AddRequestToQueue(Steam::Steam_Matchmaking_Request* request)
+	{
+		std::lock_guard<std::recursive_mutex> _(mutex);
+		requestsToProcess.push_back(request);
+	}
+
+	void ServerList::RunFrame()
+	{
+		std::lock_guard<std::recursive_mutex> _(mutex);
+		while (requestsToProcess.size() > 0)
+		{
+			Steam::Steam_Matchmaking_Request* request = requestsToProcess.front();
+
+			GetServers(request);
+
+			requestsToProcess.erase(requestsToProcess.begin());
+		}
+	}
+
 	ServerList::ServerData ServerList::CreateMockServer()
 	{
 		gameserveritem_t item{};
@@ -66,16 +100,18 @@ namespace Proxima
 		item.m_NetAdr.SetQueryPort(27015);
 		item.m_nMaxPlayers = 16;
 
-		{
-			float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-			item.m_nPing = static_cast<int>(r * 100);
-		}
-		
-		
+		item.m_nPing = 5;
 
 		item.m_nPlayers = 0;
 		item.m_nServerVersion = 4382;
-		item.m_steamID.m_unAll64Bits = 1;
+
+
+		item.m_steamID.m_comp.m_EAccountType = EAccountType::k_EAccountTypeGameServer;
+		item.m_steamID.m_comp.m_EUniverse = EUniverse::k_EUniversePublic;
+		item.m_steamID.m_comp.m_unAccountID = rand();
+		item.m_steamID.m_comp.m_unAccountInstance = 1;
+
+
 		std::strcpy(item.m_szGameDescription, "HarrierGameInfo");
 		std::strcpy(item.m_szGameDir, "StrikeVector");
 		item.SetName("StrikeVector");

@@ -2,11 +2,24 @@
 
 namespace Steam
 {
-	struct MatchMakingKeyValuePair_t;
 	class ISteamMatchmakingServerListResponse;
 	class ISteamMatchmakingPlayersResponse;
 	class ISteamMatchmakingRulesResponse;
 	class ISteamMatchmakingPingResponse;
+
+	struct MatchMakingKeyValuePair_t
+	{
+		MatchMakingKeyValuePair_t() { m_szKey[0] = m_szValue[0] = 0; }
+		MatchMakingKeyValuePair_t(const char* pchKey, const char* pchValue)
+		{
+			std::strncpy(m_szKey, pchKey, sizeof(m_szKey)); // this is a public header, use basic c library string funcs only!
+			m_szKey[sizeof(m_szKey) - 1] = '\0';
+			std::strncpy(m_szValue, pchValue, sizeof(m_szValue));
+			m_szValue[sizeof(m_szValue) - 1] = '\0';
+		}
+		char m_szKey[256];
+		char m_szValue[256];
+	};
 
 	class MatchmakingServers
 	{

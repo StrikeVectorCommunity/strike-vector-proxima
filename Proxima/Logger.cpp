@@ -1,12 +1,41 @@
 #include "pch.h"
 
+Logger::LogMessage_t Logger::logFunction = nullptr;
+
+bool FNameSuppressed_Hook(int nameIndex)
+{
+	if (nameIndex == 4943) // Some inventory stuff that spams a lot in SV
+	{
+		return true;
+	}
+
+	return false;
+}
+
+__declspec(naked) void FNameSuppressed_Stub()
+{
+	_asm
+	{
+		push [esp + 0x4]
+		call FNameSuppressed_Hook
+		add esp,4
+
+		movsx eax, al
+		retn
+	}
+}
 
 void Logger::Initialize()
 {
 	OutputDebugStringA("Initialized logger\n");
 
-	// Do not filter logs, always display no matter what channel they are
-	Utils::Hook::Set<uint8_t>(0x113B8E4, 0xEB);
+#if false
+	// Do not filter logs (FNameSuppressed returns always zero)
+	Utils::Hook::Set<uint8_t>(STATIC_TO_DYNAMIC_OFFSET(0x113B6D6), 0xEB);
+#else
+	// Handle suppression list ourselves
+	Utils::Hook(STATIC_TO_DYNAMIC_OFFSET(0x113B680), FNameSuppressed_Stub, HOOK_JUMP).install()->quick();
+#endif
 }
 
 void Logger::Print_Stub(const wchar_t* message, ...)
@@ -58,26 +87,37 @@ void Logger::MessagePrint(const std::wstring& msg)
 
 }
 
+
 void Logger::PrintOnGameConsole(const std::wstring& wmsg)
 {
-	// Until we know what's up with that WoW64 emulation subsystem error, better not to hook into the game directly
-	// It's unstable and hard to debug
-	// Maybe there is some sort of anti tampering code
-	return;
-
-#if false
+#if true
 	//// Call original print function
 	if (!wmsg.empty())
 	{
-		const bool* GFileManager = Utils::Hook::Get<bool*>(0x389D030);
+		constexpr auto GLogAddress = STATIC_TO_DYNAMIC_OFFSET(0x38ADC08);
+		const auto GLog = Utils::Hook::Get<void*>(GLogAddress);
 
-		if (*GFileManager)
+		if (GLog)
 		{
-			constexpr auto GLog = 0x389D028;
+			if (logFunction == nullptr)
+			{
+				logFunction = *reinterpret_cast<LogMessage_t*>(reinterpret_cast<int>(GLog) + 4);
+			}
 
-			Utils::Hook::Call<void(int, const wchar_t*)>(0x113B9D0)(GLog, wmsg.c_str());
+			const auto data = wmsg.c_str();
+			logFunction(reinterpret_cast<void*>(GLogAddress), data, 760); // 760 is a magic here, i don't know what it is, maybe a mask
+		}
+		else
+		{
+			logFunction = nullptr;
 		}
 	}
+#else
+	// Until we know what's up with that WoW64 emulation subsystem error, better not to hook into the game directly
+	// It's unstable and hard to debug
+	// Maybe there is some sort of anti tampering code
+
+	return;
 #endif
 }
 

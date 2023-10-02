@@ -119,6 +119,7 @@ namespace Steam
 		static Steam::Screenshots i;
 		return &i;
 	}
+
 	void Client::RunFrame()
 	{
 	}

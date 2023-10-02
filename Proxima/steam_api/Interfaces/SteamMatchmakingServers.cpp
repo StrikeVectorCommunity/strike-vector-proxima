@@ -7,47 +7,42 @@ namespace Steam {
 	HServerListRequest MatchmakingServers::RequestInternetServerList(AppId_t iApp, MatchMakingKeyValuePair_t** ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
-		//return HServerListRequest();
-		Steam_Matchmaking_Request request{};
-		request.appid = iApp;
-		request.callbacks = pRequestServersResponse;
-		request.cancelled = false;
-		request.completed = false;
-		request.id = Proxima::ServerList::GrabRequestId();
 
+		const auto request = new Steam_Matchmaking_Request(); // Lifetime control transfered to ServerList()
+		request->appid = iApp;
+		request->callbacks = pRequestServersResponse;
+		request->cancelled = false;
+		request->completed = false;
+		request->id = Proxima::ServerList::GrabRequestId();
 
-		Proxima::Client::AddToQueue([request]() {
-			// When it's here
-			Proxima::ServerList::GetServers(request.id, request);
-		});
+		Proxima::ServerList::AddRequestToQueue(request);
 
-
-		return request.id;
+		return request->id;
 	}
 	HServerListRequest MatchmakingServers::RequestLANServerList(AppId_t iApp, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
-		return HServerListRequest();
+		return RequestInternetServerList(iApp, nullptr, 0, pRequestServersResponse);
 	}
 	HServerListRequest MatchmakingServers::RequestFriendsServerList(AppId_t iApp, MatchMakingKeyValuePair_t** ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
-		return HServerListRequest();
+		return RequestInternetServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
 	}
 	HServerListRequest MatchmakingServers::RequestFavoritesServerList(AppId_t iApp, MatchMakingKeyValuePair_t** ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
-		return HServerListRequest();
+		return RequestInternetServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
 	}
 	HServerListRequest MatchmakingServers::RequestHistoryServerList(AppId_t iApp, MatchMakingKeyValuePair_t** ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
-		return HServerListRequest();
+		return RequestInternetServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
 	}
 	HServerListRequest MatchmakingServers::RequestSpectatorServerList(AppId_t iApp, MatchMakingKeyValuePair_t** ppchFilters, uint32 nFilters, ISteamMatchmakingServerListResponse* pRequestServersResponse)
 	{
 		DUMP_FUNC_NAME();
-		return HServerListRequest();
+		return RequestInternetServerList(iApp, ppchFilters, nFilters, pRequestServersResponse);
 	}
 
 	void MatchmakingServers::ReleaseRequest(HServerListRequest hServerListRequest)
@@ -58,8 +53,6 @@ namespace Steam {
 
 	gameserveritem_t* MatchmakingServers::GetServerDetails(HServerListRequest hRequest, int iServer)
 	{
-		DUMP_FUNC_NAME();
-
 		return Proxima::ServerList::GetServerInfo(hRequest, iServer);
 	}
 	void MatchmakingServers::CancelQuery(HServerListRequest hRequest)
@@ -115,7 +108,7 @@ namespace Steam {
 			// When it's here
 			Logger::Print("Executing call back for rules of IP {}, callback addr is {}?", unIP, reinterpret_cast<int>(r.rules_response));
 			Proxima::ServerList::GetServerRules(r.id, r, unIP, usPort);
-		});
+			});
 
 
 		return r.id;

@@ -33,6 +33,10 @@ public:
 	}
 
 private:
+	typedef void(__thiscall* LogMessage_t)(void*, const wchar_t*, int);
+
+	static LogMessage_t logFunction;
+
 	static void MessagePrint(const std::wstring& msg);
 	static void PrintOnGameConsole(const std::wstring& wmsg);
 };
