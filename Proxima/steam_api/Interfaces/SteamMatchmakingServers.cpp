@@ -94,24 +94,19 @@ namespace Steam {
 		DUMP_FUNC_NAME();
 
 		//return HServerListRequest();
-		Steam_Matchmaking_Servers_Direct_IP_Request r;
-		r.id = Proxima::ServerList::GrabRequestId();
-		r.ip = unIP;
-		r.port = usPort;
-		r.rules_response = pRequestServersResponse;
-		r.created = std::chrono::high_resolution_clock::now();
+		auto r = new Steam_Matchmaking_Servers_Direct_IP_Request();
+		r->id = Proxima::ServerList::GrabRequestId();
+		r->ip = unIP;
+		r->port = usPort;
+		r->rules_response = pRequestServersResponse;
+		r->created = std::chrono::high_resolution_clock::now();
 
-		Logger::Print("Queueing call back for server rules of IP {}, callback addr is {}?", unIP, reinterpret_cast<int>(r.rules_response));
-
-
-		Proxima::Client::AddToQueue([unIP, usPort, r]() {
-			// When it's here
-			Logger::Print("Executing call back for rules of IP {}, callback addr is {}?", unIP, reinterpret_cast<int>(r.rules_response));
-			Proxima::ServerList::GetServerRules(r.id, r, unIP, usPort);
-			});
+		Logger::Print("Queueing call back for server rules of IP {}, callback addr is {}?", r->ip, reinterpret_cast<int>(r->rules_response));
 
 
-		return r.id;
+		Proxima::ServerList::AddRequestToQueue(r);
+
+		return r->id;
 
 	}
 	void MatchmakingServers::CancelServerQuery(HServerQuery hServerQuery)

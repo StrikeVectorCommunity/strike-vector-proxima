@@ -7,22 +7,27 @@ namespace Steam
 {
 	HSteamPipe Client::CreateSteamPipe()
 	{
+		DUMP_FUNC_NAME();
 		return HSteamPipe();
 	}
 	bool Client::BReleaseSteamPipe(HSteamPipe hSteamPipe)
 	{
+		DUMP_FUNC_NAME();
 		return false;
 	}
 	HSteamUser Client::ConnectToGlobalUser(HSteamPipe hSteamPipe)
 	{
+		DUMP_FUNC_NAME();
 		return HSteamUser();
 	}
 	HSteamUser Client::CreateLocalUser(HSteamPipe* phSteamPipe, EAccountType eAccountType)
 	{
+		DUMP_FUNC_NAME();
 		return HSteamUser();
 	}
 	void Client::ReleaseUser(HSteamPipe hSteamPipe, HSteamUser hUser)
 	{
+		DUMP_FUNC_NAME();
 	}
 
 	Steam::User* Client::GetISteamUser(HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char* pchVersion)
@@ -41,7 +46,9 @@ namespace Steam
 	}
 	void Client::SetLocalIPBinding(uint32 unIP, uint16 usPort)
 	{
+		DUMP_FUNC_NAME();
 	}
+
 	Steam::Friends* Client::GetISteamFriends(HSteamUser hSteamUser, HSteamPipe hSteamPipe, const char* pchVersion)
 	{
 		DUMP_FUNC_NAME();
@@ -126,15 +133,18 @@ namespace Steam
 
 	uint32 Client::GetIPCCallCount()
 	{
+		DUMP_FUNC_NAME();
 		return uint32();
 	}
 
 	void Client::SetWarningMessageHook(SteamAPIWarningMessageHook_t pFunction)
 	{
+		DUMP_FUNC_NAME();
 	}
 
 	bool Client::BShutdownIfAllPipesClosed()
 	{
+		DUMP_FUNC_NAME();
 		return false;
 	}
 }

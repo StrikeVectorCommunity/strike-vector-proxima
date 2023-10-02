@@ -4,19 +4,20 @@ namespace Proxima
 {
 	std::vector<ServerList::ServerData> ServerList::mockServers{};
 	bool ServerList::hasMocked;
-	std::recursive_mutex ServerList::mutex;
+	std::mutex ServerList::mutex;
 
-	std::vector< Steam::Steam_Matchmaking_Request*> ServerList::requestsToProcess{};
+	std::vector< Steam::Steam_Matchmaking_Request*> ServerList::matchmakingRequests{};
+	std::vector< Steam::Steam_Matchmaking_Servers_Direct_IP_Request*> ServerList::rulesRequests{};
 
 	HServerListRequest ServerList::nextRequestId = 1;
 
-	void ServerList::GetServers(Steam::Steam_Matchmaking_Request* request)
+	void ServerList::ProcessRequest(Steam::Steam_Matchmaking_Request* request)
 	{
 		if (!hasMocked)
 		{
 			hasMocked = true;
 
-			for (size_t i = 0; i < 0; i++)
+			for (size_t i = 0; i < 10; i++)
 			{
 				mockServers.push_back(CreateMockServer());
 			}
@@ -45,44 +46,57 @@ namespace Proxima
 		return &mockServers[id - 1].item;
 	}
 
-	void ServerList::GetServerRules(HServerListRequest requestId, const Steam::Steam_Matchmaking_Servers_Direct_IP_Request& request, uint32_t ip, uint16_t port)
+	void ServerList::ProcessRequest(Steam::Steam_Matchmaking_Servers_Direct_IP_Request* request)
 	{
 		for (const auto& server : mockServers)
 		{
-			if (server.item.m_NetAdr.GetIP() == ip && server.item.m_NetAdr.GetQueryPort() == port)
+			if (server.item.m_NetAdr.GetIP() == request->ip && server.item.m_NetAdr.GetQueryPort() == request->port)
 			{
 				for (const auto& kv : server.rules)
 				{
-					request.rules_response->RulesResponded(kv.first.data(), kv.second.data());
+					request->rules_response->RulesResponded(kv.first.data(), kv.second.data());
 				}
 
-				Logger::Print("Responded with server rules for ip {} and port {}", ip, port);
-				request.rules_response->RulesRefreshComplete();
+				Logger::Print("Responded with server rules for ip {} and port {}", request->ip, request->port);
+				request->rules_response->RulesRefreshComplete();
 
+				delete request;
 				return;
 			}
 		}
 
-		Logger::Print("No server on ip:port {}:{} in server list ({})", ip, port, mockServers.size());
+		Logger::Print("No server on ip:port {}:{} in server list ({})", request->ip, request->port, mockServers.size());
 	}
 
 
 	void ServerList::AddRequestToQueue(Steam::Steam_Matchmaking_Request* request)
 	{
-		std::lock_guard<std::recursive_mutex> _(mutex);
-		requestsToProcess.push_back(request);
+		matchmakingRequests.push_back(request);
+	}
+
+	void ServerList::AddRequestToQueue(Steam::Steam_Matchmaking_Servers_Direct_IP_Request* request)
+	{
+		rulesRequests.push_back(request);
 	}
 
 	void ServerList::RunFrame()
 	{
-		std::lock_guard<std::recursive_mutex> _(mutex);
-		while (requestsToProcess.size() > 0)
+		while (matchmakingRequests.size() > 0)
 		{
-			Steam::Steam_Matchmaking_Request* request = requestsToProcess.front();
+			Steam::Steam_Matchmaking_Request* request = matchmakingRequests.front();
 
-			GetServers(request);
+			ProcessRequest(request);
 
-			requestsToProcess.erase(requestsToProcess.begin());
+			matchmakingRequests.erase(matchmakingRequests.begin());
+		}
+
+		while (rulesRequests.size() > 0)
+		{
+			auto* request = rulesRequests.front();
+
+			ProcessRequest(request);
+
+			rulesRequests.erase(rulesRequests.begin());
 		}
 	}
 

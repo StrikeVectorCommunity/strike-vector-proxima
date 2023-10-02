@@ -4,11 +4,11 @@ namespace Proxima
 {
 	std::vector<std::function<void()>> Client::frameQueue{};
 	Client::Profile Client::profile{};
-	std::recursive_mutex Client::mutex;
+	std::mutex Client::mutex;
 
 	void Client::RunFrame()
 	{
-		std::lock_guard<std::recursive_mutex> _(mutex);
+		std::lock_guard<std::mutex> _(mutex);
 		for (const auto& f : frameQueue)
 		{
 			f();
@@ -21,7 +21,7 @@ namespace Proxima
 
 	void Client::AddToQueue(const std::function<void()>& func)
 	{
-		std::lock_guard<std::recursive_mutex> _(mutex);
+		std::lock_guard<std::mutex> _(mutex);
 		frameQueue.push_back(func);
 	}
 

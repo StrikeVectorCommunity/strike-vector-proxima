@@ -24,20 +24,9 @@ namespace Steam
 
 	unsigned int Utils::GetServerRealTime()
 	{
-	/*	static std::optional<unsigned int> timeDelta;
-		if(!timeDelta.has_value())
-		{
-			unsigned int steamTime = static_cast<unsigned int>(time(nullptr));
-			if(Steam::Proxy::SteamUtils)
-			{
-				steamTime = Steam::Proxy::SteamUtils->GetServerRealTime();
-			}
-
-			timeDelta.emplace(steamTime - (Game::Sys_Milliseconds() / 1000));
-		}
-
-		return timeDelta.value() + (Game::Sys_Milliseconds() / 1000);*/
-		return 0;
+		DUMP_FUNC_NAME();
+		uint32 server_time = std::chrono::duration_cast<std::chrono::duration<uint32>>(std::chrono::system_clock::now().time_since_epoch()).count();
+		return server_time;
 	}
 
 	const char* Utils::GetIPCountry()
@@ -57,6 +46,7 @@ namespace Steam
 
 	bool Utils::GetCSERIPPort(unsigned int *unIP, unsigned short *usPort)
 	{
+		DUMP_FUNC_NAME();
 		return false;
 	}
 
@@ -77,16 +67,19 @@ namespace Steam
 
 	bool Utils::IsAPICallCompleted(SteamAPICall_t hSteamAPICall, bool *pbFailed)
 	{
-		return false;
+		DUMP_FUNC_NAME();
+		return true;
 	}
 
 	ESteamAPICallFailure Utils::GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
 	{
+		DUMP_FUNC_NAME();
 		return ESteamAPICallFailure::k_ESteamAPICallFailureNone;
 	}
 
 	bool Utils::GetAPICallResult(SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed)
 	{
+		DUMP_FUNC_NAME();
 		return false;
 	}
 
@@ -96,6 +89,7 @@ namespace Steam
 
 	unsigned int Utils::GetIPCCallCount()
 	{
+		DUMP_FUNC_NAME();
 		return 0;
 	}
 

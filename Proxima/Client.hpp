@@ -27,7 +27,7 @@ namespace Proxima
 		};
 
 		static Profile profile;
-		static std::recursive_mutex mutex;
+		static std::mutex mutex;
 
 		static std::vector<std::function<void()>> frameQueue;
 	
