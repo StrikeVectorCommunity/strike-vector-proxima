@@ -2,6 +2,8 @@
 
 namespace Utils
 {
+	unsigned long Hook::programOffset = 0;
+
 	std::map<void*, void*> Hook::Interceptor::IReturn;
 	std::map<void*, void(*)()> Hook::Interceptor::ICallbacks;
 
@@ -123,6 +125,39 @@ namespace Utils
 	Hook* Hook::initialize(DWORD _place, void* _stub, bool _useJump)
 	{
 		return this->initialize(reinterpret_cast<void*>(_place), _stub, _useJump);
+	}
+
+	bool Hook::FindProgramOffset()
+	{
+		const unsigned long expectedAddress = 0x00400000;
+		const auto baseAddress = reinterpret_cast<unsigned long>(GetModuleHandle("UDK.exe"));
+		const auto ASLROffset = baseAddress - expectedAddress;
+
+		programOffset = ASLROffset;
+
+		// Check it's good
+		{
+			const auto checkValue = Utils::Hook::Get<uint32_t>(STATIC_TO_DYNAMIC_OFFSET(0x2CE9878));
+			constexpr auto expectedValue = 0x4DF825FF;
+
+			if (checkValue != expectedValue)
+			{
+				constexpr auto txt = "Unexpected file offset - your UDK.exe might not be the one I wanted, or ASLR played a trick on me.\nI expected value {:010x} and got {:010x}.\nCannot continue!";
+
+				const std::string msg = std::format(
+					txt
+					, expectedValue
+					, checkValue
+				);
+
+				MessageBoxA(NULL, msg.data(), "FATAL", 0 | MB_ICONERROR | MB_SYSTEMMODAL);
+				exit(0);
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	Hook* Hook::initialize(void* _place, void* _stub, bool _useJump)

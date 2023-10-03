@@ -34,6 +34,7 @@ void Logger::Initialize()
 	Utils::Hook::Set<uint8_t>(STATIC_TO_DYNAMIC_OFFSET(0x113B6D6), 0xEB);
 #else
 	// Handle suppression list ourselves
+	const auto addr = STATIC_TO_DYNAMIC_OFFSET(0x113B680);
 	Utils::Hook(STATIC_TO_DYNAMIC_OFFSET(0x113B680), FNameSuppressed_Stub, HOOK_JUMP).install()->quick();
 #endif
 }
@@ -94,7 +95,7 @@ void Logger::PrintOnGameConsole(const std::wstring& wmsg)
 	//// Call original print function
 	if (!wmsg.empty())
 	{
-		constexpr auto GLogAddress = STATIC_TO_DYNAMIC_OFFSET(0x38ADC08);
+		const auto GLogAddress = STATIC_TO_DYNAMIC_OFFSET(0x38ADC08);
 		const auto GLog = Utils::Hook::Get<void*>(GLogAddress);
 
 		if (GLog)

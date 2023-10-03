@@ -71,8 +71,6 @@ namespace Proxima
 		profile.steamID = GenerateSteamIDFromMacAddress();
 		profile.name = GetUsername();
 
-		Logger::Initialize();
-
 		Logger::Print("Client initialized - profile name {} and ID {} (account {})\n", profile.name, profile.steamID.m_unAll64Bits, static_cast<unsigned int>(profile.steamID.m_comp.m_unAccountID));
 	}
 

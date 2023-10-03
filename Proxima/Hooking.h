@@ -3,6 +3,8 @@
 #define HOOK_JUMP true
 #define HOOK_CALL false
 
+#define STATIC_TO_DYNAMIC_OFFSET(x) (x - 0xB20000 + Utils::Hook::GetProgramOffset()) 
+
 namespace Utils
 {
 	class Hook
@@ -57,6 +59,12 @@ namespace Utils
 		Hook(DWORD place, void(*stub)(), bool useJump = true) : Hook(reinterpret_cast<void*>(place), reinterpret_cast<void*>(stub), useJump) {}
 
 		~Hook();
+		
+		/// <summary>
+		/// ASLR program offset
+		/// </summary>
+		static bool FindProgramOffset();
+		static unsigned long GetProgramOffset() { return programOffset; } ;
 
 		Hook* initialize(void* place, void* stub, bool useJump = true);
 		Hook* initialize(DWORD place, void* stub, bool useJump = true);
@@ -169,6 +177,7 @@ namespace Utils
 		}
 
 	private:
+		static unsigned long programOffset;
 		bool initialized;
 		bool installed;
 

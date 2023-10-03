@@ -10,7 +10,19 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 	{
-		Proxima::Client::Initialize();
+		// Important to adjust to ASLR on each run
+		if (Utils::Hook::FindProgramOffset())
+		{
+			Logger::Initialize();
+			Logger::Print("Client adjusted to ASLR offset of {:#010x}", Utils::Hook::GetProgramOffset());
+
+			Proxima::Client::Initialize();
+		}
+		else
+		{
+			// We failed to find program offset, we _need_ to leave
+			return FALSE;
+		}
 	}
 		break;
 
