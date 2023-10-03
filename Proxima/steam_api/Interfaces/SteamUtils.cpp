@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "SteamUtils.hpp"
 
 STEAM_IGNORE_WARNINGS_START
 
@@ -68,7 +67,11 @@ namespace Steam
 	bool Utils::IsAPICallCompleted(SteamAPICall_t hSteamAPICall, bool *pbFailed)
 	{
 		DUMP_FUNC_NAME();
-		return true;
+
+		// Later this should use Callbacks::IsCallCompleted() 
+		// But for now we lack a few implementations
+
+		return Callbacks::IsCallCompleted(hSteamAPICall);
 	}
 
 	ESteamAPICallFailure Utils::GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
@@ -79,7 +82,14 @@ namespace Steam
 
 	bool Utils::GetAPICallResult(SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed)
 	{
-		DUMP_FUNC_NAME();
+		Callbacks::Result result = Callbacks::GetAPICallResult(hSteamAPICall);
+
+		if (result.call)
+		{
+			std::memcpy(pCallback, result.data, cubCallback);
+			return true;
+		}
+
 		return false;
 	}
 

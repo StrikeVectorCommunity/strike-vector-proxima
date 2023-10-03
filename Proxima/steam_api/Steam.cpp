@@ -5,10 +5,11 @@ namespace Steam
 	SteamAPICall_t Callbacks::CallID = 0;
 	std::map<SteamAPICall_t, bool> Callbacks::Calls;
 	std::map<SteamAPICall_t, Callbacks::Base*> Callbacks::ResultHandlers;
+	std::map<SteamAPICall_t, Callbacks::Result> Callbacks::savedResults;
 	std::vector<Callbacks::Result> Callbacks::Results;
 	std::vector<Callbacks::Base*> Callbacks::CallbackList;
 	std::recursive_mutex Callbacks::Mutex;
-
+	
 	SteamAPICall_t Callbacks::RegisterCall()
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
@@ -45,9 +46,10 @@ namespace Steam
 
 		result.size = size;
 		result.type = type;
-		
+
 		Logger::Print("Pushing back results ({} results already)", Results.size());
 		Callbacks::Results.push_back(result);
+		savedResults[call] = result;
 	}
 
 	void Callbacks::RunCallbacks()
@@ -75,8 +77,9 @@ namespace Steam
 
 			if (result.data)
 			{
-				Logger::Print("Freeing result data for result type {}", result.type);
-				free(result.data);
+				// sometimes you have to keep it... idk !
+				//Logger::Print("Freeing result data for result type {}", result.type);
+				//free(result.data);
 			}
 		}
 	}

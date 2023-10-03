@@ -308,6 +308,19 @@ namespace Steam
 		static void RunCallbacks();
 
 		static void RunCallback(int32_t callback, void* data);
+		static bool IsCallCompleted(SteamAPICall_t call) { return Calls.contains(call) && Calls.at(call); };
+		static Result GetAPICallResult(SteamAPICall_t call)
+		{
+			if (IsCallCompleted(call))
+			{
+				if (savedResults.contains(call))
+				{
+					return savedResults.at(call);
+				}
+			}
+
+			return Result();
+		};
 
 		static void Uninitialize();
 
@@ -316,6 +329,7 @@ namespace Steam
 		static std::map<SteamAPICall_t, bool> Calls;
 		static std::map<SteamAPICall_t, Base*> ResultHandlers;
 		static std::vector<Result> Results;
+		static std::map<SteamAPICall_t, Result> savedResults;
 		static std::vector<Base*> CallbackList;
 		static std::recursive_mutex Mutex;
 	};

@@ -88,7 +88,7 @@ namespace Proxima
 
 	std::string FileSystem::ReadFileInternal(const std::filesystem::path& path)
 	{
-		std::ifstream stream(path, std::ifstream::ate | std::ifstream::binary);
+		std::ifstream stream(path, std::ifstream::binary);
 		if (stream.is_open())
 		{
 			std::stringstream buffer;

@@ -40,25 +40,25 @@ bool Steam::UserStats::SetStat(const char* pchName, int32 nData)
 bool Steam::UserStats::UpdateAvgRateStat(const char* pchName, float flCountThisSession, double dSessionLength)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::GetAchievement(const char* pchName, bool* pbAchieved)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::SetAchievement(const char* pchName)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::ClearAchievement(const char* pchName)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::GetAchievementAndUnlockTime(const char* pchName, bool* pbAchieved, uint32* punUnlockTime)
@@ -88,7 +88,7 @@ const char* Steam::UserStats::GetAchievementDisplayAttribute(const char* pchName
 bool Steam::UserStats::IndicateAchievementProgress(const char* pchName, uint32 nCurProgress, uint32 nMaxProgress)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 uint32 Steam::UserStats::GetNumAchievements()
@@ -105,16 +105,15 @@ const char* Steam::UserStats::GetAchievementName(uint32 iAchievement)
 
 SteamAPICall_t Steam::UserStats::RequestUserStats(CSteamID steamIDUser)
 {
-	// Enable this to allow hot reload achievements status
-	//if (steamIDUser == settings->get_local_steam_id()) {
-	//    load_achievements();
-	//}
+	UserStatsReceived_t data;
+	data.m_nGameID = STRIKE_VECTOR_APPID;
+	data.m_eResult = k_EResultOK;
+	data.m_steamIDUser = steamIDUser;
 
-	SteamAPICall_t call{};
+	const auto id = Callbacks::RegisterCall();
+	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
 
-	//DUMP_FUNC_NAME();
-
-	return call;
+	return id;
 }
 
 bool Steam::UserStats::GetUserStat(CSteamID steamIDUser, const char* pchName, int32* pData)
@@ -139,19 +138,19 @@ bool Steam::UserStats::GetUserStat(CSteamID steamIDUser, const char* pchName, in
 bool Steam::UserStats::GetUserAchievement(CSteamID steamIDUser, const char* pchName, bool* pbAchieved)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::GetUserAchievementAndUnlockTime(CSteamID steamIDUser, const char* pchName, bool* pbAchieved, uint32* punUnlockTime)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::ResetAllStats(bool bAchievementsToo)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	return true;
 }
 
 SteamAPICall_t Steam::UserStats::FindOrCreateLeaderboard(const char* pchLeaderboardName, ELeaderboardSortMethod eLeaderboardSortMethod, ELeaderboardDisplayType eLeaderboardDisplayType)
@@ -166,7 +165,7 @@ SteamAPICall_t Steam::UserStats::FindLeaderboard(const char* pchLeaderboardName)
 
     LeaderboardFindResult_t data;
 	data.m_hSteamLeaderboard = 0;
-	data.m_bLeaderboardFound = 0;
+	data.m_bLeaderboardFound = true;
 
 	const auto id = Callbacks::RegisterCall();
 	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
@@ -255,7 +254,8 @@ int Steam::UserStats::GetNextMostAchievedAchievementInfo(int iIteratorPrevious, 
 bool Steam::UserStats::GetAchievementAchievedPercent(const char* pchName, float* pflPercent)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	*pflPercent = 0.f;
+	return true;
 }
 
 SteamAPICall_t Steam::UserStats::RequestGlobalStats(int nHistoryDays)

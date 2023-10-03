@@ -83,6 +83,10 @@ namespace Proxima
 		//Utils::Hook(0x24E8BBB, EngineInit, HOOK_CALL).install()->quick();
 		//Utils::Hook(0x24E8C31, EngineInit, HOOK_CALL).install()->quick();
 
+		// Do not request EULA / Do not check Install parameters
+		Utils::Hook::Set<uint8_t>(STATIC_TO_DYNAMIC_OFFSET(0x24DF0E0), 0xC3);
+		Utils::Hook::Set<uint8_t>(STATIC_TO_DYNAMIC_OFFSET(0x24DF0E0+1), true);
+
 		Client::InitializeInternal();
 	}
 }
