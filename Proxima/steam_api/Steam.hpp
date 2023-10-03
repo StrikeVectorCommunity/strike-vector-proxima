@@ -309,13 +309,15 @@ namespace Steam
 
 		static void RunCallback(int32_t callback, void* data);
 		static bool IsCallCompleted(SteamAPICall_t call) { return Calls.contains(call) && Calls.at(call); };
-		static Result GetAPICallResult(SteamAPICall_t call)
+		static Result GrabAPICallResult(SteamAPICall_t call)
 		{
 			if (IsCallCompleted(call))
 			{
 				if (savedResults.contains(call))
 				{
-					return savedResults.at(call);
+					auto result = savedResults.at(call);
+					savedResults.erase(call);
+					return result;
 				}
 			}
 

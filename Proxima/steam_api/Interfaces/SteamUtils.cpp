@@ -82,11 +82,12 @@ namespace Steam
 
 	bool Utils::GetAPICallResult(SteamAPICall_t hSteamAPICall, void *pCallback, int cubCallback, int iCallbackExpected, bool *pbFailed)
 	{
-		Callbacks::Result result = Callbacks::GetAPICallResult(hSteamAPICall);
+		Callbacks::Result result = Callbacks::GrabAPICallResult(hSteamAPICall);
 
 		if (result.call)
 		{
 			std::memcpy(pCallback, result.data, cubCallback);
+			free(result.data);
 			return true;
 		}
 

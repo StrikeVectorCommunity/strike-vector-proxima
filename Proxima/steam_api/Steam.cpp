@@ -78,8 +78,11 @@ namespace Steam
 			if (result.data)
 			{
 				// sometimes you have to keep it... idk !
-				//Logger::Print("Freeing result data for result type {}", result.type);
-				//free(result.data);
+				if (!savedResults.contains(result.call))
+				{
+					Logger::Print("Freeing result data for result type {}", result.type);
+					free(result.data);
+				}
 			}
 		}
 	}
