@@ -43,9 +43,6 @@ void Logger::Initialize()
 	Utils::Hook::Set<uint8_t>(STATIC_TO_DYNAMIC_OFFSET(0x113B6D6), 0xEB);
 #else
 	// Handle suppression list ourselves
-	const auto test = STATIC_TO_DYNAMIC_OFFSET(0x113B99C);
-
-	const auto addr = STATIC_TO_DYNAMIC_OFFSET(0x113B680);
 	Utils::Hook(STATIC_TO_DYNAMIC_OFFSET(0x113B680), FNameSuppressed_Stub, HOOK_JUMP).install()->quick();
 #endif
 }

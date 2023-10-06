@@ -126,11 +126,10 @@ namespace Proxima
 		item.m_steamID.m_comp.m_unAccountInstance = 1;
 
 
-		std::strcpy(item.m_szGameDescription, "HarrierGameInfo");
-		std::strcpy(item.m_szGameDir, "StrikeVector");
+		strcpy_s(item.m_szGameDescription, sizeof(item.m_szGameDescription), "HarrierGameInfo");
+		strcpy_s(item.m_szGameDir, sizeof(item.m_szGameDir), "StrikeVector");
 		item.SetName("StrikeVector");
-		std::strcpy(item.m_szGameDescription, "HarrierGameInfo");
-		std::strcpy(item.m_szMap, "sw_02");
+		strcpy_s(item.m_szMap, sizeof(item.m_szMap), "sw_02");
 		item.m_ulTimeLastPlayed = 0;
 
 		std::map<std::string, std::string> rules{};

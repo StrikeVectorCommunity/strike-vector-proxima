@@ -80,12 +80,13 @@ workspace "Proxima"
 
 	filter "platforms:Win*"
 		defines {"_WINDOWS", "WIN32"}
+		linkoptions {"/IGNORE:4100"}
 	filter {}
 
 	filter "configurations:Release"
 		optimize "Size"
 		buildoptions {"/GL"}
-		linkoptions {"/IGNORE:4702", "/LTCG"}
+		linkoptions {"/IGNORE:4702"}
 		defines {"NDEBUG"}
 		flags {"FatalCompileWarnings", "FatalLinkWarnings"}
 

@@ -9,6 +9,11 @@
 
 #pragma once
 
+#pragma warning(disable: 4100)
+
+#define __STDC_LIB_EXT1__ 1
+#define __STDC_WANT_LIB_EXT1__ 1
+
 // add headers that you want to pre-compile here
 #include <windows.h>
 #include <cstdint>
@@ -26,7 +31,6 @@
 #include <codecvt>
 #include <filesystem>
 
-#include "windows.h"
 #include "iphlpapi.h"
 
 #include "Memory.h"
