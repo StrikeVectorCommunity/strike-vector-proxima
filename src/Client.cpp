@@ -9,6 +9,7 @@ namespace Proxima
 	void Client::RunFrame()
 	{
 		std::lock_guard<std::mutex> _(mutex);
+		
 		for (const auto& f : frameQueue)
 		{
 			f();
@@ -16,7 +17,10 @@ namespace Proxima
 
 		frameQueue.clear();
 		
-		Steam::Callbacks::RunCallbacks();
+		std::lock_guard<std::recursive_mutex> lock(Steam::globalMutex);
+		Steam::callbacks->GetResultsClient()->RunCallResults();
+		Steam::callbacks->GetClient()->RunCallbacks();
+
 		ServerList::RunFrame();
 	}
 
