@@ -52,6 +52,7 @@ namespace Proxima
 #include "Auth.hpp"
 #include "FileSystem.hpp"
 #include "Stats.hpp"
+#include "Leaderboards.hpp"
 
 #include "Client.hpp"
 #include "Server.hpp"

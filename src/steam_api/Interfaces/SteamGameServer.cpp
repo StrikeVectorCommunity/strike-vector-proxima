@@ -50,7 +50,6 @@ namespace Steam
     }
     CSteamID GameServer::GetSteamID()
     {
-        DUMP_FUNC_NAME();
 		return Proxima::Client::GetSteamID();
     }
     bool GameServer::WasRestartRequested()

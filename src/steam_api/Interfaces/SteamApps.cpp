@@ -61,7 +61,12 @@ namespace Steam
 
 	// returns current app install folder for AppID, returns folder name length
 
-	unsigned int Apps::GetAppInstallDir(AppId_t appID, char* pchFolder, unsigned int cchFolderBufferSize) { return 0; }
+	unsigned int Apps::GetAppInstallDir(AppId_t appID, char* pchFolder, unsigned int cchFolderBufferSize)
+	{ 
+		DUMP_FUNC_NAME();
+		return 0;
+	}
+
 	bool Apps::BIsAppInstalled(AppId_t appID) { return true; }
 
 	// Returns the associated launch param if the game is run via steam://run/<appid>//?param1=value1;param2=value2;param3=value3 etc.

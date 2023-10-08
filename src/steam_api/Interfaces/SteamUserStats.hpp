@@ -47,11 +47,43 @@ namespace Steam
 	};
 
 	struct LeaderboardFindResult_t
-{
-	enum { k_iCallback = 1100 + 4 };
-	SteamLeaderboard_t m_hSteamLeaderboard;	// handle to the leaderboard serarched for, 0 if no leaderboard found
-	uint8 m_bLeaderboardFound;				// 0 if no leaderboard found
-};
+	{
+		enum { k_iCallback = k_iSteamUserStatsCallbacks + 4 };
+		SteamLeaderboard_t m_hSteamLeaderboard;	// handle to the leaderboard serarched for, 0 if no leaderboard found
+		uint8 m_bLeaderboardFound;				// 0 if no leaderboard found
+	};
+
+
+	//-----------------------------------------------------------------------------
+	// Purpose: call result indicating scores for a leaderboard have been downloaded and are ready to be retrieved, returned as a result of DownloadLeaderboardEntries()
+	//			use CCallResult<> to map this async result to a member function
+	//-----------------------------------------------------------------------------
+	struct LeaderboardScoresDownloaded_t
+	{
+		enum { k_iCallback = k_iSteamUserStatsCallbacks + 5 };
+		SteamLeaderboard_t m_hSteamLeaderboard;
+		SteamLeaderboardEntries_t m_hSteamLeaderboardEntries;	// the handle to pass into GetDownloadedLeaderboardEntries()
+		int m_cEntryCount; // the number of entries downloaded
+	};
+
+
+	struct LeaderboardScoreUploaded_t
+	{
+		enum { k_iCallback = k_iSteamUserStatsCallbacks + 6 };
+		uint8 m_bSuccess;			// 1 if the call was successful
+		SteamLeaderboard_t m_hSteamLeaderboard;	// the leaderboard handle that was
+		int32 m_nScore;				// the score that was attempted to set
+		uint8 m_bScoreChanged;		// true if the score in the leaderboard change, false if the existing score was better
+		int m_nGlobalRankNew;		// the new global rank of the user in this leaderboard
+		int m_nGlobalRankPrevious;	// the previous global rank of the user in this leaderboard; 0 if the user had no existing entry in the leaderboard
+	};
+
+	struct NumberOfCurrentPlayers_t
+	{
+		enum { k_iCallback = k_iSteamUserStatsCallbacks + 7 };
+		uint8 m_bSuccess;			// 1 if the call was successful
+		int32 m_cPlayers;			// Number of players currently playing
+	};
 
 	class UserStats
 	{

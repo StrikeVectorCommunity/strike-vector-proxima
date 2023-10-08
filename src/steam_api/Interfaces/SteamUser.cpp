@@ -8,7 +8,7 @@ namespace Steam
 	int User::GetHSteamUser()
 	{
 		DUMP_FUNC_NAME();
-		return NULL;
+		return 1;
 	}
 
 	bool User::BLoggedOn()

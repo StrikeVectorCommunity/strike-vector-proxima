@@ -64,7 +64,7 @@ namespace Utils
 		/// ASLR program offset
 		/// </summary>
 		static bool FindProgramOffset();
-		static unsigned long GetProgramOffset() { return programOffset; } ;
+		static unsigned long GetProgramOffset() noexcept { return programOffset; } ;
 
 		Hook* initialize(void* place, void* stub, bool useJump = true);
 		Hook* initialize(DWORD place, void* stub, bool useJump = true);

@@ -409,6 +409,7 @@ namespace Steam
 			int size;
 			int type;
 			SteamAPICall_t call;
+			std::chrono::steady_clock::time_point validAfterTime;
 		};
 
 		static SteamAPICall_t RegisterCall();
@@ -420,25 +421,12 @@ namespace Steam
 		/// <param name="call"></param>
 		/// <param name="result"></param>
 		static void RegisterCallResult(SteamAPICall_t call, Base* result);
-		static void ReturnCall(void* data, int size, int type, SteamAPICall_t call);
+		static void ReturnCall(void* data, int size, int type, SteamAPICall_t call, double delay=0.1);
 		static void RunCallbacks();
 
 		static void RunCallback(int32_t callback, void* data);
-		static bool IsCallCompleted(SteamAPICall_t call) { return Calls.contains(call) && Calls.at(call); };
-		static Result GrabAPICallResult(SteamAPICall_t call)
-		{
-			if (IsCallCompleted(call))
-			{
-				if (savedResults.contains(call))
-				{
-					auto result = savedResults.at(call);
-					savedResults.erase(call);
-					return result;
-				}
-			}
-
-			return Result();
-		};
+		static bool IsCallCompleted(SteamAPICall_t call);
+		static Result GrabAPICallResult(SteamAPICall_t call);
 
 		static void Uninitialize();
 
@@ -451,8 +439,6 @@ namespace Steam
 		static std::vector<Base*> CallbackList;
 		static std::recursive_mutex Mutex;
 	};
-
-	bool Enabled();
 
 	STEAM_EXPORT bool SteamAPI_Init();
 	STEAM_EXPORT void SteamAPI_RegisterCallResult(Callbacks::Base* result, SteamAPICall_t call);

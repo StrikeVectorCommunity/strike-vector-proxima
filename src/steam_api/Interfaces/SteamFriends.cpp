@@ -28,6 +28,7 @@ namespace Steam
 
 	CSteamID Friends::GetFriendByIndex(int iFriend, int iFriendFlags)
 	{
+		DUMP_FUNC_NAME();
 		return CSteamID();
 	}
 
@@ -43,6 +44,11 @@ namespace Steam
 
 	const char *Friends::GetFriendPersonaName(CSteamID steamIDFriend)
 	{
+		if (steamIDFriend.m_comp.m_unAccountInstance == Proxima::Client::GetSteamID().m_comp.m_unAccountID)
+		{
+			return Proxima::Client::GetName();
+		}
+
 		return "";
 	}
 

@@ -30,15 +30,13 @@ namespace Steam
 		Callbacks::ResultHandlers[call] = result;
 	}
 
-	void Callbacks::ReturnCall(void* data, int size, int type, SteamAPICall_t call)
+	void Callbacks::ReturnCall(void* data, int size, int type, SteamAPICall_t call, double delay)
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
 
 		Callbacks::Result result{};
 
 		Logger::Print("Returning call {} of type {} with data ptr {} (length={})", call, type, reinterpret_cast<int>(data), size);
-
-		Callbacks::Calls[call] = true;
 
 		result.call = call;
 		result.data = malloc(size); // This will get freed later during result handling
@@ -47,7 +45,9 @@ namespace Steam
 		result.size = size;
 		result.type = type;
 
-		Logger::Print("Pushing back results ({} results already)", Results.size());
+		result.validAfterTime = std::chrono::high_resolution_clock::now() + std::chrono::duration_cast<std::chrono::seconds>(std::chrono::duration<double>(delay));
+		
+		Logger::Print("Pushing back results ({} results and {} unclaimed results already)", Results.size(), savedResults.size());
 		Callbacks::Results.push_back(result);
 		savedResults[call] = result;
 	}
@@ -56,11 +56,21 @@ namespace Steam
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
 
+		const auto now =std::chrono::high_resolution_clock::now();
+
 		auto results = Callbacks::Results;
 		Callbacks::Results.clear();
 
 		for (auto result : results)
 		{
+			if (result.validAfterTime > now)
+			{
+				Callbacks::Results.push_back(result); // Solve later
+				continue;
+			}
+			
+			Callbacks::Calls[result.call] = true;
+
 			if (Callbacks::ResultHandlers.find(result.call) != Callbacks::ResultHandlers.end())
 			{
 				Callbacks::ResultHandlers[result.call]->Run(result.data, false, result.call);
@@ -71,7 +81,7 @@ namespace Steam
 				if (callback && callback->GetICallback() == result.type)
 				{
 					Logger::Print("Running callback on result type {}!", result.type);
-					callback->Run(result.data, false, 0);
+					callback->Run(result.data, false, result.call);
 				}
 			}
 
@@ -100,6 +110,34 @@ namespace Steam
 		}
 	}
 
+	bool Callbacks::IsCallCompleted(SteamAPICall_t call) { 
+		
+		if (Calls.contains(call))
+		{
+			const auto result = Calls.at(call);
+			return result;
+		}
+	
+		return false;
+	}
+
+	Steam::Callbacks::Result Callbacks::GrabAPICallResult(SteamAPICall_t call)
+	{
+		if (IsCallCompleted(call))
+		{
+			if (savedResults.contains(call))
+			{
+				auto result = savedResults.at(call);
+				savedResults.erase(call);
+				return result;
+			}
+		}
+
+		Logger::Print("ERROR !! Tried to grab API call result when it was NOT FINISHED YET!!");
+
+		return  Result();
+	}
+
 	void Callbacks::Uninitialize()
 	{
 		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
@@ -113,11 +151,6 @@ namespace Steam
 		}
 
 		Callbacks::Results.clear();
-	}
-
-	bool Enabled()
-	{
-		return false;
 	}
 
 	extern "C"

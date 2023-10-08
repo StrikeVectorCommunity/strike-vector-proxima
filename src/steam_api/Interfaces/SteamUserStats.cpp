@@ -45,7 +45,7 @@ bool Steam::UserStats::UpdateAvgRateStat(const char* pchName, float flCountThisS
 
 bool Steam::UserStats::GetAchievement(const char* pchName, bool* pbAchieved)
 {
-	DUMP_FUNC_NAME();
+	*pbAchieved = false;
 	return true;
 }
 
@@ -64,7 +64,9 @@ bool Steam::UserStats::ClearAchievement(const char* pchName)
 bool Steam::UserStats::GetAchievementAndUnlockTime(const char* pchName, bool* pbAchieved, uint32* punUnlockTime)
 {
 	DUMP_FUNC_NAME();
-	return false;
+	*pbAchieved = false;
+	*punUnlockTime = 0;
+	return true;
 }
 
 bool Steam::UserStats::StoreStats()
@@ -75,14 +77,14 @@ bool Steam::UserStats::StoreStats()
 
 int Steam::UserStats::GetAchievementIcon(const char* pchName)
 {
-	DUMP_FUNC_NAME();
+	//DUMP_FUNC_NAME();
 	return 0;
 }
 
 const char* Steam::UserStats::GetAchievementDisplayAttribute(const char* pchName, const char* pchKey)
 {
-	DUMP_FUNC_NAME();
-	return "aa";
+	//DUMP_FUNC_NAME();
+	return pchName;
 }
 
 bool Steam::UserStats::IndicateAchievementProgress(const char* pchName, uint32 nCurProgress, uint32 nMaxProgress)
@@ -118,7 +120,6 @@ SteamAPICall_t Steam::UserStats::RequestUserStats(CSteamID steamIDUser)
 
 bool Steam::UserStats::GetUserStat(CSteamID steamIDUser, const char* pchName, int32* pData)
 {
-	DUMP_FUNC_NAME();
 	if (steamIDUser.m_unAll64Bits == Proxima::Client::GetSteamID().m_unAll64Bits)
 	{
 		float f{};
@@ -129,10 +130,12 @@ bool Steam::UserStats::GetUserStat(CSteamID steamIDUser, const char* pchName, in
 			*pData = static_cast<int32>(f);
 		}
 
+		Logger::Print("Got user stat {} for steam user {}", pchName, steamIDUser.m_unAll64Bits);
+
 		return result;
 	}
 
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::GetUserAchievement(CSteamID steamIDUser, const char* pchName, bool* pbAchieved)
@@ -161,10 +164,10 @@ SteamAPICall_t Steam::UserStats::FindOrCreateLeaderboard(const char* pchLeaderbo
 
 SteamAPICall_t Steam::UserStats::FindLeaderboard(const char* pchLeaderboardName)
 {
-	DUMP_FUNC_NAME();
+	const auto lbID = Proxima::Leaderboards::FindOrCreateLeaderboardID(pchLeaderboardName);
 
-    LeaderboardFindResult_t data;
-	data.m_hSteamLeaderboard = 0;
+	LeaderboardFindResult_t data{};
+	data.m_hSteamLeaderboard = lbID;
 	data.m_bLeaderboardFound = true;
 
 	const auto id = Callbacks::RegisterCall();
@@ -175,50 +178,114 @@ SteamAPICall_t Steam::UserStats::FindLeaderboard(const char* pchLeaderboardName)
 
 const char* Steam::UserStats::GetLeaderboardName(SteamLeaderboard_t hSteamLeaderboard)
 {
-	DUMP_FUNC_NAME();
-	return nullptr;
+	const auto lb = Proxima::Leaderboards::GetLeaderboard(hSteamLeaderboard);
+
+	if (lb)
+	{
+		return lb->name.data();
+	}
+
+	Logger::Print("WARNING!! Tried to fetch leaderboard name for {}, which did not exist at the time!", hSteamLeaderboard);
+	return "ERROR";
 }
 
 int Steam::UserStats::GetLeaderboardEntryCount(SteamLeaderboard_t hSteamLeaderboard)
 {
-	DUMP_FUNC_NAME();
+	const auto lb = Proxima::Leaderboards::GetLeaderboard(hSteamLeaderboard);
+
+	if (lb)
+	{
+		return lb->scores.size();
+	}
+
+	Logger::Print("WARNING!! Tried to fetch leaderboard count for {}, which did not exist at the time!", hSteamLeaderboard);
 	return 0;
 }
 
 Steam::ELeaderboardSortMethod Steam::UserStats::GetLeaderboardSortMethod(SteamLeaderboard_t hSteamLeaderboard)
 {
 	DUMP_FUNC_NAME();
-	return ELeaderboardSortMethod();
+
+	const auto lb = Proxima::Leaderboards::GetLeaderboard(hSteamLeaderboard);
+
+	if (lb)
+	{
+		return lb->sortMethod;
+	}
+
+	Logger::Print("WARNING!! Tried to fetch leaderboard sort method for {}, which did not exist at the time!", hSteamLeaderboard);
+	return Steam::ELeaderboardSortMethod();
 }
 
 Steam::ELeaderboardDisplayType Steam::UserStats::GetLeaderboardDisplayType(SteamLeaderboard_t hSteamLeaderboard)
 {
-	DUMP_FUNC_NAME();
+	const auto lb = Proxima::Leaderboards::GetLeaderboard(hSteamLeaderboard);
+
+	if (lb)
+	{
+		return lb->displayType;
+	}
+
+	Logger::Print("WARNING!! Tried to fetch leaderboard display type for {}, which did not exist at the time!", hSteamLeaderboard);
 	return ELeaderboardDisplayType();
 }
 
 SteamAPICall_t Steam::UserStats::DownloadLeaderboardEntries(SteamLeaderboard_t hSteamLeaderboard, ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart, int nRangeEnd)
 {
-	DUMP_FUNC_NAME();
-	return SteamAPICall_t();
+	LeaderboardScoresDownloaded_t data{};
+    data.m_hSteamLeaderboard = hSteamLeaderboard;
+    data.m_hSteamLeaderboardEntries = hSteamLeaderboard;
+	data.m_cEntryCount = 0;
+
+	const auto id = Callbacks::RegisterCall();
+	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
+
+	return id;
 }
 
 SteamAPICall_t Steam::UserStats::DownloadLeaderboardEntriesForUsers(SteamLeaderboard_t hSteamLeaderboard, CSteamID* prgUsers, int cUsers)
-{
+{    
 	DUMP_FUNC_NAME();
-	return SteamAPICall_t();
+
+	LeaderboardScoresDownloaded_t data{};
+    data.m_hSteamLeaderboard = hSteamLeaderboard;
+    data.m_hSteamLeaderboardEntries = hSteamLeaderboard;
+    data.m_cEntryCount = 0;
+
+	const auto id = Callbacks::RegisterCall();
+	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
+
+	return id;
 }
 
 bool Steam::UserStats::GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index, LeaderboardEntry_t* pLeaderboardEntry, int32* pDetails, int cDetailsMax)
 {
 	DUMP_FUNC_NAME();
-	return false;
+    LeaderboardEntry_t entry{};
+    entry.m_steamIDUser.m_unAll64Bits = 1;
+    entry.m_nGlobalRank = index;
+    entry.m_nScore = 123;
+
+    *pLeaderboardEntry = entry;
+    return true;
 }
 
 SteamAPICall_t Steam::UserStats::UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore, const int32* pScoreDetails, int cScoreDetailsCount)
 {
-	DUMP_FUNC_NAME();
-	return SteamAPICall_t();
+    LeaderboardScoreUploaded_t data;
+
+    data.m_bSuccess = 1; //needs to be success or DOA6 freezes when uploading score.
+    //data.m_bSuccess = 0;
+    data.m_hSteamLeaderboard = hSteamLeaderboard;
+    data.m_nScore = nScore;
+    data.m_bScoreChanged = false;
+    data.m_nGlobalRankNew = 1;
+    data.m_nGlobalRankPrevious = 0;
+
+	const auto id = Callbacks::RegisterCall();
+	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
+
+	return id;
 }
 
 SteamAPICall_t Steam::UserStats::AttachLeaderboardUGC(SteamLeaderboard_t hSteamLeaderboard, UGCHandle_t hUGC)
@@ -290,13 +357,16 @@ int32 Steam::UserStats::GetGlobalStatHistory(const char* pchStatName, double* pD
 
 bool Steam::UserStats::GetUserStat(CSteamID steamIDUser, const char* pchName, float* pData)
 {
-	DUMP_FUNC_NAME();
 	if (steamIDUser.m_unAll64Bits == Proxima::Client::GetSteamID().m_unAll64Bits)
 	{
 		return Proxima::Stats::GetUser()->Get(pchName, *pData);
 	}
+	else
+	{
+		*pData = 0;
+	}
 
-	return false;
+	return true;
 }
 
 bool Steam::UserStats::SetStat(const char* pchName, float fData)

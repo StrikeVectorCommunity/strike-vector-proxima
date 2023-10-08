@@ -68,8 +68,11 @@ namespace Steam
 	{
 		DUMP_FUNC_NAME();
 
-		// Later this should use Callbacks::IsCallCompleted() 
-		// But for now we lack a few implementations
+		if (hSteamAPICall == 0)
+		{
+			*pbFailed = true;
+			return true;
+		}
 
 		return Callbacks::IsCallCompleted(hSteamAPICall);
 	}
@@ -77,6 +80,12 @@ namespace Steam
 	ESteamAPICallFailure Utils::GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
 	{
 		DUMP_FUNC_NAME();
+		if (hSteamAPICall == 0)
+		{
+			Logger::Print("Returning CallFailure NetworkFailure on API call zero");
+			return ESteamAPICallFailure::k_ESteamAPICallFailureNetworkFailure;
+		}
+
 		return ESteamAPICallFailure::k_ESteamAPICallFailureNone;
 	}
 
@@ -125,6 +134,7 @@ namespace Steam
 
 	SteamAPICall_t Utils::CheckFileSignature(const char* szFileName)
 	{
+		DUMP_FUNC_NAME();
 		return SteamAPICall_t();
 	}
 

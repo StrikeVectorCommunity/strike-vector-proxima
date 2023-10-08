@@ -18,12 +18,14 @@ namespace Proxima
 
 			void Write()
 			{
+				Logger::Print("Writing {} stats for channel {}", stats.size(), static_cast<int32_t>(channel));
 				FileSystem::WriteStats(channel, stats);
 			}
 
 			void Read()
 			{
 				FileSystem::ReadStats(channel, stats);
+				Logger::Print("Read {} stats for channel {}", stats.size(),  static_cast<int32_t>(channel));
 			}
 
 			void Set(const std::string& name, float value);

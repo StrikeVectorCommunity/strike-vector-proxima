@@ -9,7 +9,6 @@ namespace Steam
 	bool RemoteStorage::FileWrite(const char* pchFile, const void* pvData, int32 cubData)
 	{
 		Logger::Print("RemoteStorage: Writing file {} with {} bytes of data", pchFile, cubData);
-
 		return Proxima::FileSystem::WriteRemoteStorageFile(pchFile, reinterpret_cast<const char*>(pvData), cubData);
 	}
 	int32 RemoteStorage::FileRead(const char* pchFile, void* pvData, int32 cubDataToRead)
