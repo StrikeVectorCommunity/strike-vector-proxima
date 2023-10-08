@@ -48,6 +48,7 @@ namespace Proxima
 #include "net.proto.h"
 
 #include "steam_api/Steam.hpp"
+#include "Callbacks.h"
 
 #include "Auth.hpp"
 #include "FileSystem.hpp"

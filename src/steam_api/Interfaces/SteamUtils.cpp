@@ -68,13 +68,10 @@ namespace Steam
 	{
 		DUMP_FUNC_NAME();
 
-		if (hSteamAPICall == 0)
-		{
-			*pbFailed = true;
-			return true;
-		}
+		//return true; // Goldberg does it like that
+		// but it's dumb
 
-		return Callbacks::IsCallCompleted(hSteamAPICall);
+		return Steam::callbacks->GetResultsClient()->HasCompleted(hSteamAPICall);
 	}
 
 	ESteamAPICallFailure Utils::GetAPICallFailureReason(SteamAPICall_t hSteamAPICall)
@@ -93,23 +90,19 @@ namespace Steam
 	{
 		Logger::Print("Trying to get api call result for call {}", hSteamAPICall);
 
-		Callbacks::Result result = Callbacks::GrabAPICallResult(hSteamAPICall);
-
-		if (result.call)
-		{
-			Logger::Print("Success");
-
-			std::memcpy(pCallback, result.data, cubCallback);
-			free(result.data);
+		if (Steam::callbacks->GetResultsClient()->GrabResult(hSteamAPICall, pCallback, cubCallback)) {
+			if (pbFailed) *pbFailed = false;
+			Logger::Print("GetAPICallResult Succeeded\n");
 			return true;
+		} else {
+			memset(pCallback, 0, cubCallback); // Zero out result
+			return false;
 		}
-
-		return false;
 	}
 
 	void Utils::RunFrame()
 	{
-		printf("");
+		// Deprecated, unused on goldberg
 	}
 
 	unsigned int Utils::GetIPCCallCount()

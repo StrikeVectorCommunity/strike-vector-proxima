@@ -2,14 +2,11 @@
 
 SteamAPICall_t Steam::GameServerStats::RequestUserStats(CSteamID steamIDUser)
 {
-    GSStatsReceived_t stats;
-    stats.m_eResult = EResult::k_EResultOK;
-    stats.m_steamIDUser = steamIDUser;
-
-    SteamAPICall_t call = Callbacks::RegisterCall();
-    Callbacks::ReturnCall(&stats, sizeof stats, GSStatsReceived_t::k_iCallback, call);
-
-    return call;
+    GSStatsReceived_t data;
+    data.m_eResult = EResult::k_EResultOK;
+    data.m_steamIDUser = steamIDUser;
+    
+    return Steam::callbacks->GetResultsServer()->AddCallResult(data.k_iCallback, &data, sizeof(data), 0.1);;
 }
 
 bool Steam::GameServerStats::GetUserStat(CSteamID steamIDUser, const char* pchName, int32* pData)
@@ -67,16 +64,13 @@ bool Steam::GameServerStats::ClearUserAchievement(CSteamID steamIDUser, const ch
 
 SteamAPICall_t Steam::GameServerStats::StoreUserStats(CSteamID steamIDUser)
 {
-    GSStatsStored_t stats;
-    stats.m_eResult = EResult::k_EResultOK;
-    stats.m_steamIDUser = steamIDUser;
-
-    SteamAPICall_t call = Callbacks::RegisterCall();
-    Callbacks::ReturnCall(&stats, sizeof stats, GSStatsStored_t::k_iCallback, call);
+    GSStatsStored_t data;
+    data.m_eResult = EResult::k_EResultOK;
+    data.m_steamIDUser = steamIDUser;
 
     Proxima::Stats::GetServer()->Write();
-
-    return call;
+    
+    return Steam::callbacks->GetResultsServer()->AddCallResult(data.k_iCallback, &data, sizeof(data));;
 }
 
 bool Steam::GameServerStats::SetUserStat(CSteamID steamIDUser, const char* pchName, float fData)

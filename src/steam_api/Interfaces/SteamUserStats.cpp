@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "..\Steam.hpp"
 
 bool Steam::UserStats::RequestCurrentStats()
 {
@@ -9,9 +8,8 @@ bool Steam::UserStats::RequestCurrentStats()
     data.m_nGameID = STRIKE_VECTOR_APPID;
     data.m_eResult = k_EResultOK;
     data.m_steamIDUser = Proxima::Client::GetSteamID();
-
-	const auto id = Callbacks::RegisterCall();
-	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
+	
+    Steam::callbacks->GetClient()->AddCallbackResult(data.k_iCallback, &data, sizeof(data));
 
 	return true;
 }
@@ -72,6 +70,14 @@ bool Steam::UserStats::GetAchievementAndUnlockTime(const char* pchName, bool* pb
 bool Steam::UserStats::StoreStats()
 {
 	Proxima::Stats::GetUser()->Write();
+
+    std::lock_guard<std::recursive_mutex> lock(globalMutex);
+
+    UserStatsStored_t data;
+    data.m_nGameID = STRIKE_VECTOR_APPID;
+    data.m_eResult = k_EResultOK;
+	callbacks->GetClient()->AddCallbackResult(data.k_iCallback, &data, sizeof(data), 0.01);
+
 	return true;
 }
 
@@ -111,11 +117,8 @@ SteamAPICall_t Steam::UserStats::RequestUserStats(CSteamID steamIDUser)
 	data.m_nGameID = STRIKE_VECTOR_APPID;
 	data.m_eResult = k_EResultOK;
 	data.m_steamIDUser = steamIDUser;
-
-	const auto id = Callbacks::RegisterCall();
-	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
-
-	return id;
+	
+	return Steam::callbacks->GetResultsClient()->AddCallResult(data.k_iCallback, &data, sizeof(data));
 }
 
 bool Steam::UserStats::GetUserStat(CSteamID steamIDUser, const char* pchName, int32* pData)
@@ -169,11 +172,8 @@ SteamAPICall_t Steam::UserStats::FindLeaderboard(const char* pchLeaderboardName)
 	LeaderboardFindResult_t data{};
 	data.m_hSteamLeaderboard = lbID;
 	data.m_bLeaderboardFound = true;
-
-	const auto id = Callbacks::RegisterCall();
-	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
-
-	return id;
+	
+	return Steam::callbacks->GetResultsClient()->AddCallResult(data.k_iCallback, &data, sizeof(data));
 }
 
 const char* Steam::UserStats::GetLeaderboardName(SteamLeaderboard_t hSteamLeaderboard)
@@ -235,12 +235,9 @@ SteamAPICall_t Steam::UserStats::DownloadLeaderboardEntries(SteamLeaderboard_t h
 	LeaderboardScoresDownloaded_t data{};
     data.m_hSteamLeaderboard = hSteamLeaderboard;
     data.m_hSteamLeaderboardEntries = hSteamLeaderboard;
-	data.m_cEntryCount = 0;
-
-	const auto id = Callbacks::RegisterCall();
-	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
-
-	return id;
+	data.m_cEntryCount = 1;
+	
+	return Steam::callbacks->GetResultsClient()->AddCallResult(data.k_iCallback, &data, sizeof(data));
 }
 
 SteamAPICall_t Steam::UserStats::DownloadLeaderboardEntriesForUsers(SteamLeaderboard_t hSteamLeaderboard, CSteamID* prgUsers, int cUsers)
@@ -251,11 +248,8 @@ SteamAPICall_t Steam::UserStats::DownloadLeaderboardEntriesForUsers(SteamLeaderb
     data.m_hSteamLeaderboard = hSteamLeaderboard;
     data.m_hSteamLeaderboardEntries = hSteamLeaderboard;
     data.m_cEntryCount = 0;
-
-	const auto id = Callbacks::RegisterCall();
-	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
-
-	return id;
+	
+	return Steam::callbacks->GetResultsClient()->AddCallResult(data.k_iCallback, &data, sizeof(data));
 }
 
 bool Steam::UserStats::GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index, LeaderboardEntry_t* pLeaderboardEntry, int32* pDetails, int cDetailsMax)
@@ -265,6 +259,7 @@ bool Steam::UserStats::GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t h
     entry.m_steamIDUser.m_unAll64Bits = 1;
     entry.m_nGlobalRank = index;
     entry.m_nScore = 123;
+	entry.m_hUGC = 1;
 
     *pLeaderboardEntry = entry;
     return true;
@@ -281,11 +276,8 @@ SteamAPICall_t Steam::UserStats::UploadLeaderboardScore(SteamLeaderboard_t hStea
     data.m_bScoreChanged = false;
     data.m_nGlobalRankNew = 1;
     data.m_nGlobalRankPrevious = 0;
-
-	const auto id = Callbacks::RegisterCall();
-	Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, id);
-
-	return id;
+	
+	return Steam::callbacks->GetResultsClient()->AddCallResult(data.k_iCallback, &data, sizeof(data));
 }
 
 SteamAPICall_t Steam::UserStats::AttachLeaderboardUGC(SteamLeaderboard_t hSteamLeaderboard, UGCHandle_t hUGC)

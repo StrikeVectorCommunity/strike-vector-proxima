@@ -123,6 +123,7 @@ typedef void* unknown_ret;
 typedef uint32 AppId_t;
 typedef uint32 DepotId_t;
 typedef uint64 SteamAPICall_t;
+const SteamAPICall_t k_uAPICallInvalid = 0x0;
 typedef int32 HSteamPipe;
 // handle to single instance of a steam user
 typedef int32 HSteamUser;
@@ -321,6 +322,7 @@ enum EResult
 	// ...
 };
 
+#pragma pack( push, 8 )
 struct GSStatsReceived_t
 {
 	enum { k_iCallback = 1800 };
@@ -364,6 +366,27 @@ struct ValidateAuthTicketResponse_t
 	CSteamID m_OwnerSteamID; // different from m_SteamID if borrowed
 };
 
+#pragma pack( pop )
+
+namespace Steam
+{
+	struct Callbacks
+	{
+		Callbacks();
+
+		class SteamCallResults* GetResultsServer() const { return resultsServer; };
+		class SteamCallResults* GetResultsClient() const { return resultsClient; };
+		class SteamCallBacks* GetServer() const { return callbacksServer; };
+		class SteamCallBacks* GetClient() const { return callbacksClient; }
+
+	private:
+		class SteamCallResults* resultsClient, *resultsServer;
+		class SteamCallBacks* callbacksClient, *callbacksServer;
+	};
+
+	extern Callbacks* callbacks;
+}
+
 #include "Interfaces/SteamUser.hpp"
 #include "Interfaces/SteamUserStats.hpp"
 #include "Interfaces/SteamUtils.hpp"
@@ -381,72 +404,13 @@ struct ValidateAuthTicketResponse_t
 
 namespace Steam
 {
-	class Callbacks
-	{
-	public:
-		class Base
-		{
-		public:
-			Base() : Flags(0), Callback(0) {};
-
-			virtual void Run(void* pvParam) = 0;
-			virtual void Run(void* pvParam, bool bIOFailure, SteamAPICall_t hSteamAPICall) = 0;
-			virtual int GetCallbackSizeBytes() = 0;
-
-			int GetICallback() { return Callback; }
-			void SetICallback(int iCallback) { Callback = iCallback; }
-
-		protected:
-			~Base() = default;
-
-			unsigned char Flags;
-			int Callback;
-		};
-
-		struct Result
-		{
-			void* data;
-			int size;
-			int type;
-			SteamAPICall_t call;
-			std::chrono::steady_clock::time_point validAfterTime;
-		};
-
-		static SteamAPICall_t RegisterCall();
-		static void RegisterCallback(Base* handler, int callback);
-
-		/// <summary>
-		/// addCallBack
-		/// </summary>
-		/// <param name="call"></param>
-		/// <param name="result"></param>
-		static void RegisterCallResult(SteamAPICall_t call, Base* result);
-		static void ReturnCall(void* data, int size, int type, SteamAPICall_t call, double delay=0.1);
-		static void RunCallbacks();
-
-		static void RunCallback(int32_t callback, void* data);
-		static bool IsCallCompleted(SteamAPICall_t call);
-		static Result GrabAPICallResult(SteamAPICall_t call);
-
-		static void Uninitialize();
-
-	private:
-		static SteamAPICall_t CallID;
-		static std::map<SteamAPICall_t, bool> Calls;
-		static std::map<SteamAPICall_t, Base*> ResultHandlers;
-		static std::vector<Result> Results;
-		static std::map<SteamAPICall_t, Result> savedResults;
-		static std::vector<Base*> CallbackList;
-		static std::recursive_mutex Mutex;
-	};
-
 	STEAM_EXPORT bool SteamAPI_Init();
-	STEAM_EXPORT void SteamAPI_RegisterCallResult(Callbacks::Base* result, SteamAPICall_t call);
-	STEAM_EXPORT void SteamAPI_RegisterCallback(Callbacks::Base* handler, int callback);
+	STEAM_EXPORT void SteamAPI_RegisterCallResult(class CCallbackBase* result, SteamAPICall_t call);
+	STEAM_EXPORT void SteamAPI_RegisterCallback(class CCallbackBase* handler, int callback);
 	STEAM_EXPORT void SteamAPI_RunCallbacks();
 	STEAM_EXPORT void SteamAPI_Shutdown();
-	STEAM_EXPORT void SteamAPI_UnregisterCallResult(Callbacks::Base* result, SteamAPICall_t call);
-	STEAM_EXPORT void SteamAPI_UnregisterCallback(Callbacks::Base* result);
+	STEAM_EXPORT void SteamAPI_UnregisterCallResult(class CCallbackBase* result, SteamAPICall_t call);
+	STEAM_EXPORT void SteamAPI_UnregisterCallback(class CCallbackBase* result);
 
 	STEAM_EXPORT bool SteamGameServer_Init(uint32 unIP, uint16 usSteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char* pchVersionString);
 	STEAM_EXPORT void SteamGameServer_RunCallbacks();
@@ -481,5 +445,4 @@ namespace Steam
 	STEAM_EXPORT HSteamUser SteamAPI_GetHSteamUser();
 	STEAM_EXPORT bool SteamAPI_InitSafe() { return true; };
 	STEAM_EXPORT bool SteamAPI_IsSteamRunning() { return true; };
-
 }

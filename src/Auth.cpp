@@ -43,8 +43,7 @@ namespace Proxima
         data.m_hAuthTicket = ttt;
         data.m_eResult = k_EResultOK;
 
-        const auto callID = Steam::Callbacks::RegisterCall();
-        Steam::Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, callID);
+        Steam::callbacks->GetClient()->AddCallbackResult(data.k_iCallback, &data, sizeof(data));
 
         outbound.push_back(ticket_data);
 
@@ -141,7 +140,6 @@ namespace Proxima
         data.m_eAuthSessionResponse = resp;
         data.m_OwnerSteamID = id;
         
-        const auto callID = Steam::Callbacks::RegisterCall();
-        Steam::Callbacks::ReturnCall(&data, sizeof(data), data.k_iCallback, callID);
+        Steam::callbacks->GetClient()->AddCallbackResult(data.k_iCallback, &data, sizeof(data));
     }
 }

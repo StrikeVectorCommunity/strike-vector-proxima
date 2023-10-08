@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "../Steam.hpp"
 
 namespace Steam {
 

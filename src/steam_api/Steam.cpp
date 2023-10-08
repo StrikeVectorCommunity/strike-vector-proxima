@@ -2,155 +2,13 @@
 
 namespace Steam
 {
-	SteamAPICall_t Callbacks::CallID = 0;
-	std::map<SteamAPICall_t, bool> Callbacks::Calls;
-	std::map<SteamAPICall_t, Callbacks::Base*> Callbacks::ResultHandlers;
-	std::map<SteamAPICall_t, Callbacks::Result> Callbacks::savedResults;
-	std::vector<Callbacks::Result> Callbacks::Results;
-	std::vector<Callbacks::Base*> Callbacks::CallbackList;
-	std::recursive_mutex Callbacks::Mutex;
-	
-	SteamAPICall_t Callbacks::RegisterCall()
+	Callbacks::Callbacks()
 	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-		Callbacks::Calls[++Callbacks::CallID] = false;
-		return Callbacks::CallID;
-	}
+		resultsClient = new SteamCallResults();
+		resultsServer = new SteamCallResults();
 
-	void Callbacks::RegisterCallback(Callbacks::Base* handler, int callback)
-	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-		handler->SetICallback(callback);
-		Callbacks::CallbackList.push_back(handler);
-	}
-
-	void Callbacks::RegisterCallResult(SteamAPICall_t call, Callbacks::Base* result)
-	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-		Callbacks::ResultHandlers[call] = result;
-	}
-
-	void Callbacks::ReturnCall(void* data, int size, int type, SteamAPICall_t call, double delay)
-	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-
-		Callbacks::Result result{};
-
-		Logger::Print("Returning call {} of type {} with data ptr {} (length={})", call, type, reinterpret_cast<int>(data), size);
-
-		result.call = call;
-		result.data = malloc(size); // This will get freed later during result handling
-		std::memcpy(result.data, data, size);
-
-		result.size = size;
-		result.type = type;
-
-		result.validAfterTime = std::chrono::high_resolution_clock::now() + std::chrono::duration_cast<std::chrono::seconds>(std::chrono::duration<double>(delay));
-		
-		Logger::Print("Pushing back results ({} results and {} unclaimed results already)", Results.size(), savedResults.size());
-		Callbacks::Results.push_back(result);
-		savedResults[call] = result;
-	}
-
-	void Callbacks::RunCallbacks()
-	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-
-		const auto now =std::chrono::high_resolution_clock::now();
-
-		auto results = Callbacks::Results;
-		Callbacks::Results.clear();
-
-		for (auto result : results)
-		{
-			if (result.validAfterTime > now)
-			{
-				Callbacks::Results.push_back(result); // Solve later
-				continue;
-			}
-			
-			Callbacks::Calls[result.call] = true;
-
-			if (Callbacks::ResultHandlers.find(result.call) != Callbacks::ResultHandlers.end())
-			{
-				Callbacks::ResultHandlers[result.call]->Run(result.data, false, result.call);
-			}
-
-			for (auto callback : Callbacks::CallbackList)
-			{
-				if (callback && callback->GetICallback() == result.type)
-				{
-					Logger::Print("Running callback on result type {}!", result.type);
-					callback->Run(result.data, false, result.call);
-				}
-			}
-
-			if (result.data)
-			{
-				// sometimes you have to keep it... idk !
-				if (!savedResults.contains(result.call))
-				{
-					Logger::Print("Freeing result data for result type {}", result.type);
-					free(result.data);
-				}
-			}
-		}
-	}
-
-	void Callbacks::RunCallback(int32_t callback, void* data)
-	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-
-		for (auto cb : Callbacks::CallbackList)
-		{
-			if (cb && cb->GetICallback() == callback)
-			{
-				cb->Run(data);
-			}
-		}
-	}
-
-	bool Callbacks::IsCallCompleted(SteamAPICall_t call) { 
-		
-		if (Calls.contains(call))
-		{
-			const auto result = Calls.at(call);
-			return result;
-		}
-	
-		return false;
-	}
-
-	Steam::Callbacks::Result Callbacks::GrabAPICallResult(SteamAPICall_t call)
-	{
-		if (IsCallCompleted(call))
-		{
-			if (savedResults.contains(call))
-			{
-				auto result = savedResults.at(call);
-				savedResults.erase(call);
-				return result;
-			}
-		}
-
-		Logger::Print("ERROR !! Tried to grab API call result when it was NOT FINISHED YET!!");
-
-		return  Result();
-	}
-
-	void Callbacks::Uninitialize()
-	{
-		std::lock_guard<std::recursive_mutex> _(Callbacks::Mutex);
-
-		for (auto result : Callbacks::Results)
-		{
-			if (result.data)
-			{
-				free(result.data);
-			}
-		}
-
-		Callbacks::Results.clear();
+		callbacksClient = new SteamCallBacks(GetResultsClient());
+		callbacksServer = new SteamCallBacks(GetResultsServer());
 	}
 
 	extern "C"
@@ -172,14 +30,22 @@ namespace Steam
 			return true;
 		}
 
-		void SteamAPI_RegisterCallResult(Callbacks::Base* result, SteamAPICall_t call)
+		void SteamAPI_RegisterCallResult(CCallbackBase* result, SteamAPICall_t call)
 		{
-			Callbacks::RegisterCallResult(call, result);
+			std::lock_guard<std::recursive_mutex> lock(globalMutex);
+			Steam::callbacks->GetResultsClient()->AddCallback(call, result);
+			Steam::callbacks->GetResultsServer()->AddCallback(call, result);
 		}
 
-		void SteamAPI_RegisterCallback(Callbacks::Base* handler, int callback)
+		void SteamAPI_RegisterCallback(class CCallbackBase* pCallback, int iCallback)
 		{
-			Callbacks::RegisterCallback(handler, callback);
+			bool isGameServer = CCallbackMgr::isServer(pCallback);
+			if (isGameServer) {
+				Steam::callbacks->GetServer()->AddCallback(iCallback, pCallback);
+			}
+			else {
+				Steam::callbacks->GetClient()->AddCallback(iCallback, pCallback);
+			}
 		}
 
 		void SteamAPI_RunCallbacks()
@@ -190,17 +56,30 @@ namespace Steam
 		void SteamAPI_Shutdown()
 		{
 			//Proxy::Uninititalize();
-			Callbacks::Uninitialize();
-		}
-
-		void SteamAPI_UnregisterCallResult(Callbacks::Base* result, SteamAPICall_t call)
-		{
 			DUMP_FUNC_NAME();
 		}
 
-		void SteamAPI_UnregisterCallback(Callbacks::Base* result)
+		void SteamAPI_UnregisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall)
 		{
 			DUMP_FUNC_NAME();
+			if (!hAPICall)
+				return;
+
+			std::lock_guard<std::recursive_mutex> lock(globalMutex);
+			Steam::callbacks->GetResultsClient()->RemoveCallback(hAPICall, pCallback);
+			Steam::callbacks->GetResultsServer()->RemoveCallback(hAPICall, pCallback);
+		}
+
+		void SteamAPI_UnregisterCallback(class CCallbackBase* pCallback)
+		{
+			int iCallback = pCallback->GetICallback();
+			bool isGameServer = CCallbackMgr::isServer(pCallback);
+			if (isGameServer) {
+				Steam::callbacks->GetServer()->RemoveCallback(iCallback, pCallback);
+			}
+			else {
+				Steam::callbacks->GetClient()->RemoveCallback(iCallback, pCallback);
+			}
 		}
 
 		bool SteamGameServer_Init(uint32 unIP, uint16 usSteamPort, uint16 usGamePort, uint16 usQueryPort, EServerMode eServerMode, const char* pchVersionString)

@@ -12,8 +12,10 @@ namespace Proxima
 		}
 
 		frameQueue.clear();
+				
+		Steam::callbacks->GetResultsServer()->RunCallResults();
+		Steam::callbacks->GetServer()->RunCallbacks();
 
-		Steam::Callbacks::RunCallbacks();
 	}
 
 	void Server::AddToQueue(const std::function<void()>& func)

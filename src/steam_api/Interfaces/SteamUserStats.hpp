@@ -36,7 +36,8 @@ namespace Steam
 		k_ELeaderboardUploadScoreMethodKeepBest = 1,	// Leaderboard will keep user's best score
 		k_ELeaderboardUploadScoreMethodForceUpdate = 2,	// Leaderboard will always replace score with specified
 	};
-
+	
+#pragma pack( push, 8 )
 	struct LeaderboardEntry_t
 	{
 		CSteamID m_steamIDUser; // user with the entry - use SteamFriends()->GetFriendPersonaName() & SteamFriends()->GetFriendAvatar() to get more info
@@ -84,6 +85,8 @@ namespace Steam
 		uint8 m_bSuccess;			// 1 if the call was successful
 		int32 m_cPlayers;			// Number of players currently playing
 	};
+	
+#pragma pack( pop )
 
 	class UserStats
 	{
